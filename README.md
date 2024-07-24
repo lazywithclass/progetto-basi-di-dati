@@ -1,6 +1,6 @@
 # progetto-basi-di-dati
 
-Appunti preliminari
+## Appunti preliminari
 
 1. analisi dei requisiti - prendere dal libro le info e seguire
 2. identificazione delle funzionalita da sviluppare - ez
@@ -14,7 +14,7 @@ Il progetto si pone l’obiettivo di sviluppare un’applicazione di basi di dat
 biblioteca, dislocata su diverse sedi, con funzionalita sia per i lettori iscritti alla biblioteca, che
 per i bibliotecari che la gestiscono
 
-Utente lettore
+### Utente lettore
 * visualizzare le informazioni sui cataloghi e sui libri
 * prendere in prestito fintanto che non supera la soglia massima di libri consegnati in ritardo
 * Ogni prestito ha una durata massima di default pari a un mese
@@ -25,7 +25,7 @@ Utente lettore
 * il numero massimo di volumi che possono essere contemporaneamente in prestito puo cambiare
 * per ogni libro prestato occorre tenere traccia della data in cui viene effettuata la restituzione
 
-Utente bibliotecario
+### Utente bibliotecario
 * inserisce l'avvenuta riconsegna del libro
 * puo azzerare il numero di volumi restituiti in ritardo dal lettore
 * puo' estendere la durata massima del prestito
@@ -33,16 +33,16 @@ Utente bibliotecario
 * aggiunge o modifica lettori
 * aggiunge o modifica sedi
 
-Biblioteca
+### Biblioteca
 * su diversi indirizzi
 
-Libro
+### Libro
 * ogni libro nella libreria ha almeno: ISBN, titolo, autori, trama, e casa editrice (la biblioteca puo possedere diverse copie, identificate da un codice univoco, che possono essere distribuite anche su diverse sedi)
 * per ogni copia di un dato libro sapere quale sede lo gestisce e se e disponibile oppure al momento gia prestato
 * puo avere diversi autori
 * I libri gestiti dalla biblioteca possono essere presi in prestito dai lettori iscritti alla biblioteca
 
-Autore
+### Autore
 * Degli autori, identificati da un codice univoco, la biblioteca mantiene informazioni quali nome e cognome, data di nascita ed eventualmente di morte, ed una breve biografia
 
 ## Feature obbligatoriamente da implementare usando strutture interne al db
