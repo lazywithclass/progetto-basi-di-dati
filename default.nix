@@ -1,17 +1,15 @@
+# default.nix
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
+  name = "pg-shell";
+
   buildInputs = [
     pkgs.php
-    pkgs.apacheHttpd
+    pkgs.postgresql
+    pkgs.dbeaver
   ];
 
   shellHook = ''
-    export COMPOSER_HOME="$HOME/.composer"
-    export PATH="$COMPOSER_HOME/vendor/bin:$PATH"
-
-    # Start Apache HTTPD with the user's configuration
-    echo "Starting Apache HTTPD..."
-    httpd -f $PWD/httpd.conf -k start
   '';
 }
