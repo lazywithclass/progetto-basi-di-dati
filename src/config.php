@@ -1,4 +1,7 @@
 <?php
+# https://stackoverflow.com/a/14451001
+error_reporting(0);
+
 function get_connection() {
     $host = 'localhost';
     $db   = 'quibreria';
