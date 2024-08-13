@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h2 class="my-4 text-center">Quibreria - Login</h2>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger" role="alert">
-                <?php echo htmlspecialchars($error); ?>
+                <?php echo $error; ?>
             </div>
         <?php endif; ?>
         <form action="login.php" method="post" class="needs-validation" novalidate>
