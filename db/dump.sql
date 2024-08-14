@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS reader CASCADE;
 DROP TABLE IF EXISTS author_book CASCADE;
 DROP TABLE IF EXISTS author CASCADE;
 DROP TABLE IF EXISTS book CASCADE;
+DROP TABLE IF EXISTS library CASCADE;
+DROP TABLE IF EXISTS branch CASCADE;
 
 -- creation
 
@@ -52,6 +54,19 @@ CREATE TABLE author_book (
     FOREIGN KEY (isbn) REFERENCES book(isbn) ON DELETE CASCADE
 );
 
+CREATE TABLE library (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE branch (
+    id SERIAL PRIMARY KEY,
+    id_library INTEGER NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_library) REFERENCES library(id)
+);
+
 
 -- data
 
@@ -72,3 +87,20 @@ INSERT INTO book (isbn, title, publisher, plot) VALUES
 ('978-0451225245', 'The Pillars of the Earth', 'William Morrow & Company', 'A historical novel by Ken Follett, published in 1989, about the building of a cathedral in the fictional town of Kingsbridge, England. It is the first in the Kingsbridge Series.');
 
 INSERT INTO author_book (author_id, isbn) VALUES (1, '978-0618640157'), (2, '978-0684801223'), (3, '978-0743278904'), (4, '978-0451225245');
+
+INSERT INTO library (name) VALUES ('Shawshank Library');
+INSERT INTO library (name) VALUES ('Minas Tirith Library');
+INSERT INTO library (name) VALUES ('Dorian Gray Library');
+INSERT INTO library (name) VALUES ('Jedi Archive');
+INSERT INTO library (name) VALUES ('Rivendell Library');
+
+INSERT INTO branch (id_library, city, address) VALUES (1, 'Portland', '123 Oak Street');
+INSERT INTO branch (id_library, city, address) VALUES (1, 'Portsmouth', '456 Maple Avenue');
+INSERT INTO branch (id_library, city, address) VALUES (2, 'Minas Tirith', '789 White Tree Road');
+INSERT INTO branch (id_library, city, address) VALUES (2, 'Osgiliath', '321 Anduin Way');
+INSERT INTO branch (id_library, city, address) VALUES (3, 'London', '654 Hyde Park Blvd');
+INSERT INTO branch (id_library, city, address) VALUES (3, 'Oxford', '987 Piccadilly Square');
+INSERT INTO branch (id_library, city, address) VALUES (4, 'Coruscant', '111 Jedi Temple');
+INSERT INTO branch (id_library, city, address) VALUES (4, 'Alderaan', '222 Peaceful Grove');
+INSERT INTO branch (id_library, city, address) VALUES (5, 'Rivendell', '333 Elven Path');
+INSERT INTO branch (id_library, city, address) VALUES (5, 'Lothlórien', '444 Golden Forest');

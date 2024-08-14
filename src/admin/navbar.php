@@ -8,7 +8,7 @@
             $navItems = [
                 ['label' => 'Manage Readers', 'link' => '/admin/manage-readers.php'],
                 ['label' => 'Manage Books', 'link' => '/admin/manage-books.php'],
-                ['label' => 'Create Branch', 'link' => '/admin/create-branch.php'],
+                ['label' => 'Manage Branches', 'link' => '/admin/manage-branches.php'],
                 ['label' => 'Register Book as Returned', 'link' => '/admin/register-return.php'],
                 ['label' => 'Clear Overdue Books', 'link' => '/admin/clear-overdue.php'],
                 ['label' => 'Extend Loan', 'link' => '/admin/extend-loan.php']

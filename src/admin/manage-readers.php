@@ -103,7 +103,6 @@ if (isset($_GET['edit'])) {
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Username</th>
                     <th>Fiscal Code</th>
                     <th>Name</th>
@@ -114,7 +113,6 @@ if (isset($_GET['edit'])) {
             <tbody>
                 <?php foreach ($readers as $reader): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($reader['id']); ?></td>
                     <td><?php echo htmlspecialchars($reader['username']); ?></td>
                     <td><?php echo htmlspecialchars($reader['fiscal_code']); ?></td>
                     <td><?php echo htmlspecialchars($reader['name']); ?></td>
