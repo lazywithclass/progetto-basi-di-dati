@@ -155,8 +155,12 @@ if (isset($_GET['edit'])) {
                     <?php endforeach; ?>
                 </select>
             </div>
-            <button type="submit" name="create" class="btn btn-primary">Add Book</button>
-            <button type="submit" name="update" class="btn btn-secondary">Update Book</button>
+            <?php if (isset($editBook)): ?>
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($editBook['id']); ?>">
+                <button type="submit" name="update" class="btn btn-secondary">Update Book</button>
+            <?php else: ?>
+                <button type="submit" name="create" class="btn btn-primary">Add Book</button>
+            <?php endif; ?>
         </form>
 
         <h2>Books List</h2>

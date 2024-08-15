@@ -2,12 +2,18 @@
 session_start();
 require_once '../config.php';
 
+
+if ($_SESSION['loggedin']) {
+    header('Location: index.php');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
     $db = get_connection();
-    $query = "SELECT password_hash FROM librarians WHERE username = $1";
+    $query = "SELECT id, password_hash FROM librarian WHERE username = $1";
     $result = pg_prepare($db, 'login_query', $query);
     $result = pg_execute($db, 'login_query', array($username));
 
@@ -16,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (password_verify($password, $row['password_hash'])) {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $username;
+            $_SESSION['id'] = $row['id'];
             header('Location: index.php');
             exit;
         } else {

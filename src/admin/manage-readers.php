@@ -2,20 +2,14 @@
 session_start();
 require_once '../config.php';
 require_once 'check-logged.php';
+require_once 'lib/reader.php';
 
 
 $db = get_connection();
-$query = "SELECT id, username, fiscal_code, name, surname FROM reader";
-$result = pg_prepare($db, 'select_reader_query', $query);
-$result = pg_execute($db, 'select_reader_query', array());
 
-$readers = [];
-if ($result) {
-    while ($row = pg_fetch_assoc($result)) {
-        $readers[] = $row;
-    }
-}
+$readers = find_readers_for_librarian($_SESSION['id']);
 
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $fiscal_code = $_POST['fiscal_code'];
@@ -27,11 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $query = "INSERT INTO reader (username, password_hash, fiscal_code, name, surname) VALUES ($1, $2, $3, $4, $5)";
         $result = pg_prepare($db, 'insert_reader_query', $query);
         $result = pg_execute($db, 'insert_reader_query', array($username, $password, $fiscal_code, $name, $surname));
+
+        if (!$result) {
+            $error = pg_last_error($dbconn);
+        }
     } elseif (isset($_POST['update'])) {
-        $id = $_POST['reader_id'];
+        $id = $_GET['edit'];
         $query = "UPDATE reader SET username = $1, fiscal_code = $2, name = $3, surname = $4, password_hash = $5 WHERE id = $6";
         $result = pg_prepare($db, 'update_reader_query', $query);
         $result = pg_execute($db, 'update_reader_query', array($username, $fiscal_code, $name, $surname, $password, $id));
+
+        if (!$result) {
+            $error = pg_last_error($dbconn);
+        }
+    } elseif (isset($_POST['reset'])) {
+        echo("AAAAAAAAAAAAAAA");
     }
 }
 
@@ -40,6 +44,10 @@ if (isset($_GET['delete'])) {
     $query = "DELETE FROM reader WHERE id = $1";
     $result = pg_prepare($db, 'delete_reader_query', $query);
     $result = pg_execute($db, 'delete_reader_query', array($id));
+
+    if (!$result) {
+        $error = pg_last_error($dbconn);
+    }
 }
 
 $editReader = null;
@@ -51,6 +59,21 @@ if (isset($_GET['edit'])) {
 
     if ($result) {
         $editReader = pg_fetch_assoc($result);
+    } else {
+        $error = pg_last_error($dbconn);
+    }
+}
+
+if (isset($_GET['reset-overdue'])) {
+    $id = $_GET['reset-overdue'];
+    $id_library = $_GET['library-id'];
+
+    $query = "UPDATE library_reader SET overdue_returns = 0 WHERE id_reader = $1 AND id_library = $2";
+    $result = pg_prepare($db, 'update_reader_query', $query);
+    $result = pg_execute($db, 'update_reader_query', array($id, $id_library));
+
+    if (!$result) {
+        $error = pg_last_error($dbconn);
     }
 }
 ?>
@@ -72,9 +95,7 @@ if (isset($_GET['edit'])) {
 
     <div class="container mt-4">
         <h1>Manage Readers</h1>
-
         <form method="POST" class="mb-4">
-            <input type="hidden" name="reader_id" value="<?php echo htmlspecialchars($editReader['id'] ?? ''); ?>">
             <div class="form-group">
                 <label>Username:</label>
                 <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($editReader['username'] ?? ''); ?>" required>
@@ -95,15 +116,26 @@ if (isset($_GET['edit'])) {
                 <label>Surname:</label>
                 <input type="text" name="surname" class="form-control" value="<?php echo htmlspecialchars($editReader['surname'] ?? ''); ?>" required>
             </div>
-            <button type="submit" name="create" class="btn btn-primary">Add Reader</button>
-            <button type="submit" name="update" class="btn btn-secondary">Update Reader</button>
+            <?php if (isset($editReader)): ?>
+                <button type="submit" name="update" class="btn btn-secondary">Update Reader</button>
+            <?php else: ?>
+                <button type="submit" name="create" class="btn btn-primary">Add Reader</button>
+            <?php endif; ?>
         </form>
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
 
         <h2>Readers List</h2>
+        <p>Listed here are readers that are registered to your registered libraries</p>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Username</th>
+                    <th>Library name</th>
+                    <th>Overdue count</th>
                     <th>Fiscal Code</th>
                     <th>Name</th>
                     <th>Surname</th>
@@ -114,10 +146,13 @@ if (isset($_GET['edit'])) {
                 <?php foreach ($readers as $reader): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($reader['username']); ?></td>
+                    <td><?php echo htmlspecialchars($reader['library_name']); ?></td>
+                    <td><?php echo htmlspecialchars($reader['overdue_returns']); ?></td>
                     <td><?php echo htmlspecialchars($reader['fiscal_code']); ?></td>
                     <td><?php echo htmlspecialchars($reader['name']); ?></td>
                     <td><?php echo htmlspecialchars($reader['surname']); ?></td>
                     <td class="text-nowrap">
+                        <a href="?reset-overdue=<?php echo $reader['id']; ?>&library-id=<?php echo $reader['library_id']; ?>" class="btn btn-info btn-sm" onclick="return confirm('Are you sure you want to reset this reader\'s overdue count?')">Reset overdue</a>
                         <a href="?edit=<?php echo $reader['id']; ?>" class="btn btn-info btn-sm">Edit</a>
                         <a href="?delete=<?php echo $reader['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this reader?')">Delete</a>
                     </td>
