@@ -38,7 +38,7 @@ CREATE INDEX idx_book_title ON book(title);
 
 CREATE TABLE author_book (
     id_author INT NOT NULL,
-    id_book VARCHAR(14) NOT NULL,
+    id_book INT NOT NULL,
     PRIMARY KEY (id_author, id_book),
     FOREIGN KEY (id_author) REFERENCES author(id) ON DELETE CASCADE,
     FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE
@@ -157,7 +157,7 @@ INSERT INTO library_reader (id_reader, id_library) VALUES (1, 1), (1, 2), (1, 3)
 INSERT INTO library_reader (id_reader, id_library) VALUES (2, 1), (2, 2), (2, 3), (2, 4), (2, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (3, 2), (3, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (4, 2), (4, 5);
-INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (5, 2, 4), (5, 5, 5);
+INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (5, 2, 5), (5, 5, 5);
 INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (6, 2, 2), (6, 5, 4);
 INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (7, 2, 3), (7, 5, 3);
 INSERT INTO library_reader (id_reader, id_library) VALUES (8, 2), (8, 5);
@@ -181,6 +181,8 @@ INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES
 (3, 1, 20), (3, 2, 20), (3, 3, 20), (3, 4, 20), (3, 5, 20), (3, 6, 20), (3, 7, 20), (3, 8, 20), (3, 9, 20), (3, 10, 20),
 (4, 1, 20), (4, 2, 20), (4, 3, 20), (4, 4, 20), (4, 5, 20), (4, 6, 20), (4, 7, 20), (4, 8, 20), (4, 9, 20), (4, 10, 20);
 
+INSERT INTO loan (id_reader, id_physical_copy, start_date, length) VALUES (5, 10, '2024-08-18', 30);
+
 -- Materialized views
 
 CREATE MATERIALIZED VIEW librarian_books AS
@@ -193,8 +195,6 @@ CREATE MATERIALIZED VIEW librarian_books AS
   FROM book b
   JOIN physical_copy pc ON pc.id_book = b.id
   JOIN librarian_branches lb ON pc.id_branch = lb.id_branch;
-
-CREATE MATERIALIZED VIEW reader_books AS
 
 -- Functions and triggers
 
@@ -214,3 +214,29 @@ CREATE TRIGGER refresh_materialized_view_on_book AFTER INSERT OR UPDATE OR DELET
 FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();
 CREATE TRIGGER refresh_materialized_view_on_physical_copy AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON physical_copy
 FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();
+
+--
+
+CREATE OR REPLACE FUNCTION check_overdue_loans()
+RETURNS TRIGGER AS $$
+DECLARE
+    overdue_returns INT;
+BEGIN
+    SELECT lr.overdue_returns INTO overdue_returns
+    FROM loan l
+    JOIN physical_copy pc ON l.id_physical_copy = pc.id
+    JOIN branch b ON b.id = pc.id_branch
+    JOIN library_reader lr ON lr.id_reader = NEW.id_reader AND lr.id_library = b.id_library;
+
+    IF overdue_returns >= 5 THEN
+        RAISE EXCEPTION 'Reader has 5 or more overdue loans and cannot borrow more books.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_overdue_loans
+BEFORE INSERT ON loan
+FOR EACH ROW
+EXECUTE FUNCTION check_overdue_loans();

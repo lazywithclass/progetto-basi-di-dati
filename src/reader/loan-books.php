@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once '../check-logged.php';
+require_once 'check-logged.php';
 
 $db = get_connection();
 
@@ -9,11 +9,8 @@ $query = "SELECT id_library FROM library_reader WHERE id_reader = $1";
 $result = pg_prepare($db, 'select_user_library_query', $query);
 $result = pg_execute($db, 'select_user_library_query', array($_SESSION['id']));
 if ($result) {
-    $row = pg_fetch_assoc($result);
-    if ($row) {
-        $userLibraryId = $row['id_library'];
-    } else {
-        $error = "Could not find a library linked to this user";
+    while ($row = pg_fetch_assoc($result)) {
+        $userLibraries[] = $row['id_library'];
     }
 } else {
     $error = pg_last_error($db);
@@ -29,10 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           FROM book b
           JOIN physical_copy pc ON pc.id_book = b.id
           JOIN branch br ON br.id = pc.id_branch
-          WHERE br.id_library = $1 AND (b.title ILIKE $2 OR b.isbn ILIKE $2)";
+          WHERE br.id_library = ANY($1) AND (b.title ILIKE $2 OR b.isbn ILIKE $2)";
 
         $result = pg_prepare($db, 'search_books_query', $query);
-        $result = pg_execute($db, 'search_books_query', array($userLibraryId, '%' . $searchTerm . '%'));
+        $result = pg_execute($db, 'search_books_query', array('{' . implode(',', $userLibraries) . '}', '%' . $searchTerm . '%'));
 
         if ($result) {
             while ($row = pg_fetch_assoc($result)) {

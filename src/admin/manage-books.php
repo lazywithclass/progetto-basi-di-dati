@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once '../check-logged.php';
+require_once 'check-logged.php';
 require_once './lib/books.php';
 require_once './lib/librarians.php';
 

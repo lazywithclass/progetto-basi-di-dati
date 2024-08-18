@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="container">
         <h2 class="my-4 text-center">Quibreria - Reader login</h2>
+        <p><a href="/admin/">Switch</a> to admin login.</p>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger" role="alert">
                 <?php echo $error; ?>
