@@ -37,12 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_prepare($db, 'return_loan_query', $query);
         $result = pg_execute($db, 'return_loan_query', array($loanId));
 
-        if (!$result) {
-            $error = pg_last_error($db);
-        } else {
-            // TODO do this also elsewhere
+        if ($result) {
             header('Location: manage-loans.php');
             exit;
+        } else {
+            $error = pg_last_error($db);
         }
     } elseif (isset($_POST['extend'])) {
         $loanId = $_POST['loan_id'];
@@ -51,11 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_prepare($db, 'extend_loan_query', $query);
         $result = pg_execute($db, 'extend_loan_query', array($loanId));
 
-        if (!$result) {
-            $error = pg_last_error($db);
-        } else {
+        if ($result) {
             header('Location: manage-loans.php');
             exit;
+        } else {
+            $error = pg_last_error($db);
         }
     }
 }

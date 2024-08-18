@@ -23,7 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_prepare($db, 'insert_reader_query', $query);
         $result = pg_execute($db, 'insert_reader_query', array($username, $password, $fiscal_code, $name, $surname));
 
-        if (!$result) {
+        if ($result) {
+            header('Location: manage-readers.php');
+            exit;
+        } else {
             $error = pg_last_error($db);
         }
     } elseif (isset($_POST['update'])) {
@@ -32,8 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_prepare($db, 'update_reader_query', $query);
         $result = pg_execute($db, 'update_reader_query', array($username, $fiscal_code, $name, $surname, $password, $id));
 
-        if (!$result) {
+        if ($result) {
+            header('Location: manage-readers.php');
+            exit;
+        } else {
             $error = pg_last_error($db);
+
         }
     } elseif (isset($_POST['reset'])) {
         echo("AAAAAAAAAAAAAAA");
@@ -46,7 +53,10 @@ if (isset($_GET['delete'])) {
     $result = pg_prepare($db, 'delete_reader_query', $query);
     $result = pg_execute($db, 'delete_reader_query', array($id));
 
-    if (!$result) {
+    if ($result) {
+        header('Location: manage-readers.php');
+        exit;
+    } else {
         $error = pg_last_error($db);
     }
 }
@@ -73,7 +83,10 @@ if (isset($_GET['reset-overdue'])) {
     $result = pg_prepare($db, 'update_reader_query', $query);
     $result = pg_execute($db, 'update_reader_query', array($id, $id_library));
 
-    if (!$result) {
+    if ($result) {
+        header('Location: manage-readers.php');
+        exit;
+    } else {
         $error = pg_last_error($db);
     }
 }

@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $query = "INSERT INTO branch (id_library, city, address) VALUES ($1, $2, $3)";
     $result = pg_prepare($db, 'insert_branch', $query);
     $result = pg_execute($db, 'insert_branch', array($id_library, $city, $address));
+
+    // TOO handle error
+    header('Location: manage-branches.php');
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
@@ -50,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $query = "UPDATE branch SET id_library = $2, city = $3, address = $4 WHERE id = $1";
     $result = pg_prepare($db, 'update_branch', $query);
     $result = pg_execute($db, 'update_branch', array($id, $id_library, $city, $address));
+
+    // TOO handle error
+    header('Location: manage-branches.php');
+    exit;
 }
 
 if (isset($_GET['delete'])) {
@@ -58,6 +66,10 @@ if (isset($_GET['delete'])) {
     $query = "DELETE FROM branch WHERE id = $1";
     $result = pg_prepare($db, 'delete_branch', $query);
     $result = pg_execute($db, 'delete_branch', array($id));
+
+    // TOO handle error
+    header('Location: manage-branches.php');
+    exit;
 }
 
 $editBranch = null;

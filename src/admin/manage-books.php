@@ -35,6 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $copies_number = $_POST['copies_number'];
 
         insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
+
+        // TOO handle error
+        header('Location: manage-books.php');
+        exit;
     }
 
     if (isset($_POST['update'])) {
@@ -48,6 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $copies_number = $_POST['copies_number'];
 
         update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
+
+        // TOO handle error
+        header('Location: manage-books.php');
+        exit;
     }
 }
 
@@ -58,10 +66,12 @@ if (isset($_GET['delete'])) {
     $query = "DELETE FROM book WHERE id = $1";
     $result = pg_prepare($db, 'delete_book_query', $query);
     $result = pg_execute($db, 'delete_book_query', array($id));
-    if (!$result) {
+    if ($result) {
+        header('Location: manage-books.php');
+        exit;
+    } else {
         $error = pg_last_error($db);
     }
-
 }
 
 $books = find_books_for_librarian($_SESSION['id']);
