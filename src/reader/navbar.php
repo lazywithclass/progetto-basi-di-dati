@@ -6,10 +6,7 @@
             $currentUrl = $_SERVER['REQUEST_URI'];
 
             $navItems = [
-                ['label' => 'Manage Readers', 'link' => '/admin/manage-readers.php'],
-                ['label' => 'Manage Books', 'link' => '/admin/manage-books.php'],
-                ['label' => 'Manage Branches', 'link' => '/admin/manage-branches.php'],
-                ['label' => 'Manage Loans', 'link' => '/admin/manage-loans.php']
+                ['label' => 'Loan books', 'link' => '/reader/loan-books.php']
             ];
 
             foreach ($navItems as $item) {

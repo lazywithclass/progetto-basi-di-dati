@@ -1,111 +1,106 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once 'check-logged.php';
+require_once '../check-logged.php';
+require_once './lib/books.php';
+require_once './lib/librarians.php';
 
 
 $db = get_connection();
+$error = '';
+
 $query = "SELECT id, name, surname FROM author";
 $result = pg_prepare($db, 'select_author_query', $query);
 $result = pg_execute($db, 'select_author_query', array());
-
 $authors = [];
 if ($result) {
     while ($row = pg_fetch_assoc($result)) {
         $authors[] = $row;
     }
 }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
-    $isbn = $_POST['isbn'];
-    $title = $_POST['title'];
-    $publisher = $_POST['publisher'];
-    $plot = $_POST['plot'];
-    $selected_authors = $_POST['authors'];
-
-    $db = get_connection();
-    $query = "INSERT INTO book (isbn, title, publisher, plot) VALUES ($1, $2, $3, $4)";
-    $result = pg_prepare($db, 'insert_book_query', $query);
-    $result = pg_execute($db, 'insert_book_query', array($isbn, $title, $publisher, $plot));
-
-    foreach ($selected_authors as $author_id) {
-        $query = "INSERT INTO author_book (author_id, isbn) VALUES ($1, $2)";
-        $result = pg_prepare($db, 'insert_author_book_query', $query);
-        $result = pg_execute($db, 'insert_author_book_query', array($author_id, $isbn));
-    }
+if (!$result) {
+    $error = pg_last_error($db);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-    $isbn = $_POST['isbn'];
-    $title = $_POST['title'];
-    $publisher = $_POST['publisher'];
-    $plot = $_POST['plot'];
-    $selected_authors = $_POST['authors'];
+$branches = find_librarian_branches($_SESSION['id']);
 
-    $db = get_connection();
-    $query = "UPDATE book SET title = $2, publisher = $3, plot = $4 WHERE isbn = $1";
-    $result = pg_prepare($db, 'update_book_query', $query);
-    $result = pg_execute($db, 'update_book_query', array($isbn, $title, $publisher, $plot));
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['create'])) {
+        $id_branch = $_POST['id_branch'];
+        $isbn = $_POST['isbn'];
+        $title = $_POST['title'];
+        $publisher = $_POST['publisher'];
+        $plot = $_POST['plot'];
+        $selected_authors = $_POST['authors'];
+        $copies_number = $_POST['copies_number'];
 
-    $query = "DELETE FROM author_book WHERE isbn = $1";
-    $result = pg_prepare($db, 'delete_author_book_query', $query);
-    $result = pg_execute($db, 'delete_author_book_query', array($isbn));
+        insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
+    }
 
-    foreach ($selected_authors as $author_id) {
-        $query = "INSERT INTO author_book (author_id, isbn) VALUES ($1, $2)";
-        $result = pg_prepare($db, 'insert_author_book_query', $query);
-        $result = pg_execute($db, 'insert_author_book_query', array($author_id, $isbn));
+    if (isset($_POST['update'])) {
+        $id_book = $_GET['edit'];
+        $id_branch = $_POST['id_branch'];
+        $isbn = $_POST['isbn'];
+        $title = $_POST['title'];
+        $publisher = $_POST['publisher'];
+        $plot = $_POST['plot'];
+        $selected_authors = $_POST['authors'];
+        $copies_number = $_POST['copies_number'];
+
+        update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
     }
 }
 
 if (isset($_GET['delete'])) {
-    $isbn = $_GET['delete'];
+    $id = $_GET['delete'];
 
     $db = get_connection();
-    $query = "DELETE FROM book WHERE isbn = $1";
+    $query = "DELETE FROM book WHERE id = $1";
     $result = pg_prepare($db, 'delete_book_query', $query);
-    $result = pg_execute($db, 'delete_book_query', array($isbn));
-
-    $query = "DELETE FROM author_book WHERE isbn = $1";
-    $result = pg_prepare($db, 'delete_author_book_query', $query);
-    $result = pg_execute($db, 'delete_author_book_query', array($isbn));
-}
-
-$db = get_connection();
-$query = "SELECT * FROM book";
-$result = pg_prepare($db, 'select_book_query', $query);
-$result = pg_execute($db, 'select_book_query', array());
-
-$books = [];
-if ($result) {
-    while ($row = pg_fetch_assoc($result)) {
-        $books[] = $row;
+    $result = pg_execute($db, 'delete_book_query', array($id));
+    if (!$result) {
+        $error = pg_last_error($db);
     }
+
 }
+
+$books = find_books_for_librarian($_SESSION['id']);
 
 $editBook = null;
 $selectedAuthors = [];
 if (isset($_GET['edit'])) {
-    $isbn = $_GET['edit'];
+    $id = $_GET['edit'];
 
     $db = get_connection();
-    $query = "SELECT * FROM book WHERE isbn = $1";
-    $result = pg_prepare($db, 'select_book_by_isbn_query', $query);
-    $result = pg_execute($db, 'select_book_by_isbn_query', array($isbn));
+    $query = "SELECT * FROM book WHERE id = $1";
+    $result = pg_prepare($db, 'select_book_query', $query);
+    $result = pg_execute($db, 'select_book_query', array($id));
     if ($result) {
         $editBook = pg_fetch_assoc($result);
+    } else {
+        $error = pg_last_error($db);
     }
 
-    $query = "SELECT author_id FROM author_book WHERE isbn = $1";
-    $result = pg_prepare($db, 'select_authors_by_isbn_query', $query);
-    $result = pg_execute($db, 'select_authors_by_isbn_query', array($isbn));
+    $query = "SELECT id_author FROM author_book WHERE id_book = $1";
+    $result = pg_prepare($db, 'select_authors_query', $query);
+    $result = pg_execute($db, 'select_authors_query', array($id));
 
     if ($result) {
         while ($row = pg_fetch_assoc($result)) {
-            $selectedAuthors[] = $row['author_id'];
+            $selectedAuthors[] = $row['id_author'];
         }
+    } else {
+        $error = pg_last_error($db);
     }
 
+    $query = "SELECT copies_number FROM physical_copy WHERE id_book = $1";
+    $result = pg_prepare($db, 'select_copies_query', $query);
+    $result = pg_execute($db, 'select_copies_query', array($id));
+    $editBook['copies_number'] = pg_fetch_assoc($result)['copies_number'];
+
+    if (!$result) {
+        $error = pg_last_error($db);
+    }
 }
 ?>
 
@@ -155,6 +150,21 @@ if (isset($_GET['edit'])) {
                     <?php endforeach; ?>
                 </select>
             </div>
+            <div class="form-group">
+                <label>Branch:</label>
+                <select name="id_branch" class="form-control" required>
+                    <?php foreach ($branches as $branch): ?>
+                        <option value="<?php echo htmlspecialchars($branch['id']); ?>"
+                            <?php echo (isset($selectedBranch) && in_array($branch['id'], $selectedBranch)) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($branch['city'] . ' ' . $branch['address']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Copies number:</label>
+                <input type="text" name="copies_number" class="form-control" value="<?php echo htmlspecialchars($editBook['copies_number'] ?? ''); ?>" required>
+            </div>
             <?php if (isset($editBook)): ?>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($editBook['id']); ?>">
                 <button type="submit" name="update" class="btn btn-secondary">Update Book</button>
@@ -162,8 +172,14 @@ if (isset($_GET['edit'])) {
                 <button type="submit" name="create" class="btn btn-primary">Add Book</button>
             <?php endif; ?>
         </form>
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
 
         <h2>Books List</h2>
+        <p>Listed here are books that are available in your libraries</p>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -171,6 +187,8 @@ if (isset($_GET['edit'])) {
                     <th>Title</th>
                     <th>Publisher</th>
                     <th>Plot</th>
+                    <th>Branch</th>
+                    <th>Copies</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -181,9 +199,11 @@ if (isset($_GET['edit'])) {
                     <td><?php echo htmlspecialchars($book['title']); ?></td>
                     <td><?php echo htmlspecialchars($book['publisher']); ?></td>
                     <td><?php echo htmlspecialchars($book['plot']); ?></td>
+                    <td><?php echo htmlspecialchars($book['branch_name']); ?></td>
+                    <td><?php echo htmlspecialchars($book['copies_number']); ?></td>
                     <td class="text-nowrap">
-                        <a href="?edit=<?php echo $book['isbn']; ?>" class="btn btn-info btn-sm">Edit</a>
-                        <a href="?delete=<?php echo $book['isbn']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>
+                        <a href="?edit=<?php echo $book['id']; ?>" class="btn btn-info btn-sm">Edit</a>
+                        <a href="?delete=<?php echo $book['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
 
     $db = get_connection();
-    $query = "SELECT id, password_hash FROM librarian WHERE username = $1";
+    $query = "SELECT id, password_hash FROM reader WHERE username = $1";
     $result = pg_prepare($db, 'login_query', $query);
     $result = pg_execute($db, 'login_query', array($username));
 
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="container">
-        <h2 class="my-4 text-center">Quibreria - Librarian login</h2>
+        <h2 class="my-4 text-center">Quibreria - Reader login</h2>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger" role="alert">
                 <?php echo $error; ?>

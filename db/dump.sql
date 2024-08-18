@@ -3,13 +3,17 @@ SET search_path TO public;
 DROP TABLE IF EXISTS author CASCADE;
 DROP TABLE IF EXISTS book CASCADE;
 DROP TABLE IF EXISTS author_book CASCADE;
-DROP TABLE IF EXISTS loan CASCADE;
 DROP TABLE IF EXISTS reader CASCADE;
-DROP TABLE IF EXISTS librarian CASCADE;
 DROP TABLE IF EXISTS library CASCADE;
+DROP TABLE IF EXISTS branch CASCADE;
+DROP TABLE IF EXISTS physical_copy CASCADE;
+DROP TABLE IF EXISTS loan CASCADE;
+DROP TABLE IF EXISTS librarian CASCADE;
 DROP TABLE IF EXISTS library_reader CASCADE;
 DROP TABLE IF EXISTS library_librarian CASCADE;
-DROP TABLE IF EXISTS branch CASCADE;
+
+
+DROP MATERIALIZED VIEW IF EXISTS librarian_books;
 
 -- creation
 
@@ -23,7 +27,8 @@ CREATE TABLE author (
 );
 
 CREATE TABLE book (
-    isbn VARCHAR(14) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    isbn VARCHAR(14) UNIQUE NOT NULL,
     title TEXT NOT NULL,
     publisher VARCHAR(255) NOT NULL,
     plot TEXT NOT NULL
@@ -32,11 +37,11 @@ CREATE INDEX idx_book_isbn ON book(isbn);
 CREATE INDEX idx_book_title ON book(title);
 
 CREATE TABLE author_book (
-    author_id INT NOT NULL,
-    isbn VARCHAR(14) NOT NULL,
-    PRIMARY KEY (author_id, isbn),
-    FOREIGN KEY (author_id) REFERENCES author(id) ON DELETE CASCADE,
-    FOREIGN KEY (isbn) REFERENCES book(isbn) ON DELETE CASCADE
+    id_author INT NOT NULL,
+    id_book VARCHAR(14) NOT NULL,
+    PRIMARY KEY (id_author, id_book),
+    FOREIGN KEY (id_author) REFERENCES author(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE
 );
 
 CREATE TABLE reader (
@@ -49,6 +54,28 @@ CREATE TABLE reader (
 );
 CREATE INDEX idx_reader_username ON reader(username);
 CREATE INDEX idx_reader_fiscal_code ON reader(fiscal_code);
+
+CREATE TABLE library (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE branch (
+    id SERIAL PRIMARY KEY,
+    id_library INTEGER NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_library) REFERENCES library(id)
+);
+
+CREATE TABLE physical_copy(
+    id SERIAL PRIMARY KEY,
+    id_book INTEGER NOT NULL,
+    id_branch INTEGER NOT NULL,
+    copies_number INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_branch) REFERENCES branch(id) ON DELETE CASCADE
+);
 
 CREATE TABLE loan (
     id SERIAL PRIMARY KEY,
@@ -68,11 +95,6 @@ CREATE TABLE librarian (
     email VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE library (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
 CREATE TABLE library_reader (
     id_reader INTEGER NOT NULL,
     id_library INTEGER NOT NULL,
@@ -87,18 +109,9 @@ CREATE TABLE library_librarian (
     id_librarian INTEGER NOT NULL,
     id_library INTEGER NOT NULL,
     PRIMARY KEY (id_librarian, id_library),
-    FOREIGN KEY (id_librarian) REFERENCES librarian(id),
-    FOREIGN KEY (id_library) REFERENCES library(id)
+    FOREIGN KEY (id_librarian) REFERENCES librarian(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_library) REFERENCES library(id) ON DELETE CASCADE
 );
-
-CREATE TABLE branch (
-    id SERIAL PRIMARY KEY,
-    id_library INTEGER NOT NULL,
-    city VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    FOREIGN KEY (id_library) REFERENCES library(id)
-);
-
 
 -- data
 
@@ -106,16 +119,16 @@ CREATE TABLE branch (
 INSERT INTO librarian (username, password_hash, email) VALUES ('brooks', 'reUO0yT0/590.', 'brooks.hatlen@shawshank.com');
 INSERT INTO librarian (username, password_hash, email) VALUES ('conan', 're0SmNOQGPBoE', 'conan.the.librarian@cimmeria.com');
 
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GNDLF1234567890', 'gandalf', '$2y$10$e0MYzXyjpJS7Pd0RVvHwHe', 'Gandalf', 'Grey');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('FRDBG1234567891', 'frodo', '$2y$10$M.4K9h.kUFeBN/4Q3FvD.6', 'Frodo', 'Baggins');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GLDML1234567892', 'galadriel', '$2y$10$VJ0pFxY.zx2eVB3.s/ePFO', 'Galadriel', '');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('ASLN01234567893', 'aslan', '$2y$10$K9jhsdf88uhd92jd/', 'Aslan', '');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('PVRL12345678994', 'pippin', '$2y$10$msdguyrqwe78asdh/', 'Pippin', 'Took');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GMRY12345678995', 'gimli', '$2y$10$QkJD6sXk3oOq8GF.v6snze', 'Gimli', '');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('SMWIS1234567896', 'samwise', '$2y$10$sYQYuwjdyb1jgwoPNO/.D.', 'Samwise', 'Gamgee');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('LEGOL1234567897', 'legolas', '$2y$10$R0mdaQn1KyfHo/Je4N.BvG', 'Legolas', 'Greenleaf');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('MDMRT1234567898', 'madmartigan', '$2y$10$0gm/VfBZhshBXOCwzCGSu/', 'Madmartigan', '');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('TYRN12345678999', 'tyrion', '$2y$10$Qnwg78juh43/nYsd/', 'Tyrion', 'Lannister');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GNDLF1234567890', 'gandalf', '$2y$10$5uGjEGVdsZtv5VrsKH2Sq.8Lbbr3Qwt55bUqGoKl/Jezco3.OPcHe', 'Gandalf', 'Grey');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('FRDBG1234567891', 'frodo', '$2y$10$wnnB5TOtfB/nn1Ed.ZO6eeZ/Wtn5D5IHlk8wLJWHrIj1AZHHG0TYm ', 'Frodo', 'Baggins');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GLDML1234567892', 'galadriel', '$2y$10$W7uFFyHzpfM2/WbgKHhzU.ysZdxoAUmyzMxmTi3MgWz3pqyl9oF8S', 'Galadriel', '');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('ASLN01234567893', 'aslan', '$2y$10$ScAe4yOzSm3cR/SsIs.HuuhYr9hqaLA9gqee1YhlNu9ACUOT4zOyO', 'Aslan', '');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('PVRL12345678994', 'pippin', '$2y$10$rZWsfSj7KAqN..c6o8OTG.y.f/G5lhy6ccLsFz2T4NQdJT2oC2qou', 'Pippin', 'Took');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GMRY12345678995', 'gimli', '$2y$10$kUtgr27gEnT2SN09Osj8IOGYttkHwUkipZVFZRlcS3VTEU9xZ5TU.', 'Gimli', '');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('SMWIS1234567896', 'samwise', '$2y$10$HYnVrREWDiYdr2/dhoz12.9xQBaF9yHjz4tUS/LRaD.X4fy3gxE6q', 'Samwise', 'Gamgee');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('LEGOL1234567897', 'legolas', '$2y$10$GYEyR0aWGFE8X8zQu628ROaureAVhj2Ecxkk8FmDZjYPMTSk2AjJ6', 'Legolas', 'Greenleaf');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('MDMRT1234567898', 'madmartigan', '$2y$10$/GNnDpoNeP2fmAkfZ6Hwj.GpEXo/6mAt7oZA0BBeCziC8vBlyE4cC', 'Madmartigan', '');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('TYRN12345678999', 'tyrion', '$2y$10$cNCxBQe.NUY/6pSTjhcZQeEcCwj1O77rOImFpR../EKw0U2h0mg2q', 'Tyrion', 'Lannister');
 
 INSERT INTO author (name, surname, bio, birth_date, death_date) VALUES
 ('John', 'Tolkien', 'J. R. R. Tolkien was an English writer, poet, philologist, and academic, best known as the author of the classic high-fantasy works The Hobbit, The Lord of the Rings, and The Silmarillion.', '1892-01-03', '1973-09-02'),
@@ -129,7 +142,7 @@ INSERT INTO book (isbn, title, publisher, plot) VALUES
 ('978-0743278904', 'Jonathan Livingston Seagull', 'Macmillan', 'A fable about a seagull who is trying to learn about life and flight, and a homily about self-perfection. Richard Bach, a former US Air Force pilot, and avowed flying enthusiast who has written numerous works of fiction and non-fiction related to flight.'),
 ('978-0451225245', 'The Pillars of the Earth', 'William Morrow & Company', 'A historical novel by Ken Follett, published in 1989, about the building of a cathedral in the fictional town of Kingsbridge, England. It is the first in the Kingsbridge Series.');
 
-INSERT INTO author_book (author_id, isbn) VALUES (1, '978-0618640157'), (2, '978-0684801223'), (3, '978-0743278904'), (4, '978-0451225245');
+INSERT INTO author_book (id_author, id_book) VALUES (1, 1), (2, 2), (3, 3), (4, 4);
 
 INSERT INTO library (name) VALUES ('Shawshank Library');
 INSERT INTO library (name) VALUES ('Minas Tirith Library');
@@ -161,3 +174,43 @@ INSERT INTO branch (id_library, city, address) VALUES (4, 'Coruscant', '111 Jedi
 INSERT INTO branch (id_library, city, address) VALUES (4, 'Alderaan', '222 Peaceful Grove');
 INSERT INTO branch (id_library, city, address) VALUES (5, 'Rivendell', '333 Elven Path');
 INSERT INTO branch (id_library, city, address) VALUES (5, 'Lothlórien', '444 Golden Forest');
+
+INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES
+(1, 1, 20), (1, 2, 20), (1, 3, 20), (1, 4, 20), (1, 5, 20), (1, 6, 20), (1, 7, 20), (1, 8, 20), (1, 9, 20), (1, 10, 20),
+(2, 1, 20), (2, 2, 20), (2, 3, 20), (2, 4, 20), (2, 5, 20), (2, 6, 20), (2, 7, 20), (2, 8, 20), (2, 9, 20), (2, 10, 20),
+(3, 1, 20), (3, 2, 20), (3, 3, 20), (3, 4, 20), (3, 5, 20), (3, 6, 20), (3, 7, 20), (3, 8, 20), (3, 9, 20), (3, 10, 20),
+(4, 1, 20), (4, 2, 20), (4, 3, 20), (4, 4, 20), (4, 5, 20), (4, 6, 20), (4, 7, 20), (4, 8, 20), (4, 9, 20), (4, 10, 20);
+
+-- Materialized views
+
+CREATE MATERIALIZED VIEW librarian_books AS
+  WITH librarian_branches AS (
+    SELECT br.id AS id_branch, lb.id_librarian
+    FROM branch br
+    JOIN library_librarian lb ON br.id_library = lb.id_library
+  )
+  SELECT DISTINCT b.*, lb.id_librarian
+  FROM book b
+  JOIN physical_copy pc ON pc.id_book = b.id
+  JOIN librarian_branches lb ON pc.id_branch = lb.id_branch;
+
+CREATE MATERIALIZED VIEW reader_books AS
+
+-- Functions and triggers
+
+CREATE OR REPLACE FUNCTION refresh_librarian_books()
+RETURNS TRIGGER AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW librarian_books;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER refresh_materialized_view_on_branch AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON branch
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();
+CREATE TRIGGER refresh_materialized_view_on_library_librarian AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON library_librarian
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();
+CREATE TRIGGER refresh_materialized_view_on_book AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON book
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();
+CREATE TRIGGER refresh_materialized_view_on_physical_copy AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE ON physical_copy
+FOR EACH STATEMENT EXECUTE FUNCTION refresh_librarian_books();

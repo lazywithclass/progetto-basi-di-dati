@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once 'check-logged.php';
+require_once '../check-logged.php';
 
 $db = get_connection();
 
@@ -120,6 +120,7 @@ if (isset($_GET['edit'])) {
         </form>
 
         <h2>Branches List</h2>
+        <p>Listed here are branches that belong to your libraries</p>
         <table class="table table-striped">
             <thead>
                 <tr>

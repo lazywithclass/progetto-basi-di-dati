@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php';
-require_once 'check-logged.php';
+require_once '../check-logged.php';
 require_once 'lib/reader.php';
 
 
@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    echo($password);
 
     if (isset($_POST['create'])) {
         $query = "INSERT INTO reader (username, password_hash, fiscal_code, name, surname) VALUES ($1, $2, $3, $4, $5)";
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'insert_reader_query', array($username, $password, $fiscal_code, $name, $surname));
 
         if (!$result) {
-            $error = pg_last_error($dbconn);
+            $error = pg_last_error($db);
         }
     } elseif (isset($_POST['update'])) {
         $id = $_GET['edit'];
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'update_reader_query', array($username, $fiscal_code, $name, $surname, $password, $id));
 
         if (!$result) {
-            $error = pg_last_error($dbconn);
+            $error = pg_last_error($db);
         }
     } elseif (isset($_POST['reset'])) {
         echo("AAAAAAAAAAAAAAA");
@@ -46,7 +47,7 @@ if (isset($_GET['delete'])) {
     $result = pg_execute($db, 'delete_reader_query', array($id));
 
     if (!$result) {
-        $error = pg_last_error($dbconn);
+        $error = pg_last_error($db);
     }
 }
 
@@ -60,7 +61,7 @@ if (isset($_GET['edit'])) {
     if ($result) {
         $editReader = pg_fetch_assoc($result);
     } else {
-        $error = pg_last_error($dbconn);
+        $error = pg_last_error($db);
     }
 }
 
@@ -73,7 +74,7 @@ if (isset($_GET['reset-overdue'])) {
     $result = pg_execute($db, 'update_reader_query', array($id, $id_library));
 
     if (!$result) {
-        $error = pg_last_error($dbconn);
+        $error = pg_last_error($db);
     }
 }
 ?>
@@ -129,7 +130,7 @@ if (isset($_GET['reset-overdue'])) {
         <?php endif; ?>
 
         <h2>Readers List</h2>
-        <p>Listed here are readers that are registered to your registered libraries</p>
+        <p>Listed here are readers that are registered to your libraries</p>
         <table class="table table-striped">
             <thead>
                 <tr>
