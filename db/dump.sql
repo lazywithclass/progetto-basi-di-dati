@@ -120,7 +120,7 @@ INSERT INTO librarian (username, password_hash, email) VALUES ('brooks', 'reUO0y
 INSERT INTO librarian (username, password_hash, email) VALUES ('conan', 're0SmNOQGPBoE', 'conan.the.librarian@cimmeria.com');
 
 INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GNDLF1234567890', 'gandalf', '$2y$10$5uGjEGVdsZtv5VrsKH2Sq.8Lbbr3Qwt55bUqGoKl/Jezco3.OPcHe', 'Gandalf', 'Grey');
-INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('FRDBG1234567891', 'frodo', '$2y$10$wnnB5TOtfB/nn1Ed.ZO6eeZ/Wtn5D5IHlk8wLJWHrIj1AZHHG0TYm ', 'Frodo', 'Baggins');
+INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('FRDBG1234567891', 'frodo', '$2y$10$wnnB5TOtfB/nn1Ed.ZO6eeZ/Wtn5D5IHlk8wLJWHrIj1AZHHG0TYm', 'Frodo', 'Baggins');
 INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('GLDML1234567892', 'galadriel', '$2y$10$W7uFFyHzpfM2/WbgKHhzU.ysZdxoAUmyzMxmTi3MgWz3pqyl9oF8S', 'Galadriel', '');
 INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('ASLN01234567893', 'aslan', '$2y$10$ScAe4yOzSm3cR/SsIs.HuuhYr9hqaLA9gqee1YhlNu9ACUOT4zOyO', 'Aslan', '');
 INSERT INTO reader (fiscal_code, username, password_hash, name, surname) VALUES ('PVRL12345678994', 'pippin', '$2y$10$rZWsfSj7KAqN..c6o8OTG.y.f/G5lhy6ccLsFz2T4NQdJT2oC2qou', 'Pippin', 'Took');
@@ -153,8 +153,8 @@ INSERT INTO library (name) VALUES ('Rivendell Library');
 INSERT INTO library_librarian (id_librarian, id_library) VALUES (1, 2), (1, 5);
 INSERT INTO library_librarian (id_librarian, id_library) VALUES (2, 1), (2, 3), (2, 4);
 
-INSERT INTO library_reader (id_reader, id_library) VALUES (1, 1), (1, 2), (1, 3), (1, 4), (1, 5);
-INSERT INTO library_reader (id_reader, id_library) VALUES (2, 1), (2, 2), (2, 3), (2, 4), (2, 5);
+INSERT INTO library_reader (id_reader, id_library, category) VALUES (1, 1, 'premium'), (1, 2, 'premium'), (1, 3, 'premium'), (1, 4, 'premium'), (1, 5, 'premium');
+INSERT INTO library_reader (id_reader, id_library, category) VALUES (2, 1, 'base'), (2, 2, 'base'), (2, 3, 'base'), (2, 4, 'base'), (2, 5, 'premium');
 INSERT INTO library_reader (id_reader, id_library) VALUES (3, 2), (3, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (4, 2), (4, 5);
 INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (5, 2, 5), (5, 5, 5);
@@ -180,8 +180,6 @@ INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES
 (2, 1, 20), (2, 2, 20), (2, 3, 20), (2, 4, 20), (2, 5, 20), (2, 6, 20), (2, 7, 20), (2, 8, 20), (2, 9, 20), (2, 10, 20),
 (3, 1, 20), (3, 2, 20), (3, 3, 20), (3, 4, 20), (3, 5, 20), (3, 6, 20), (3, 7, 20), (3, 8, 20), (3, 9, 20), (3, 10, 20),
 (4, 1, 20), (4, 2, 20), (4, 3, 20), (4, 4, 20), (4, 5, 20), (4, 6, 20), (4, 7, 20), (4, 8, 20), (4, 9, 20), (4, 10, 20);
-
-INSERT INTO loan (id_reader, id_physical_copy, start_date, length) VALUES (5, 10, '2024-08-18', 30);
 
 -- Materialized views
 
@@ -240,3 +238,55 @@ CREATE TRIGGER trigger_check_overdue_loans
 BEFORE INSERT ON loan
 FOR EACH ROW
 EXECUTE FUNCTION check_overdue_loans();
+
+--
+
+CREATE OR REPLACE FUNCTION ensure_max_loans()
+RETURNS TRIGGER AS $$
+DECLARE
+    loans_base INT;
+    loans_premium INT;
+BEGIN
+
+    SELECT count(lr.id_reader) INTO loans_base
+    FROM loan l
+    JOIN physical_copy pc ON pc.id = l.id_physical_copy
+    JOIN branch b ON b.id = pc.id_branch
+    JOIN library_reader lr ON lr.id_library = b.id_library
+    WHERE lr.id_reader = NEW.id_reader AND lr.category = 'base' AND lr.id_library IN (
+          SELECT b.id_library
+          FROM physical_copy pc
+          JOIN branch b ON b.id = pc.id_branch
+          WHERE pc.id = NEW.id_physical_copy
+    )
+    GROUP BY lr.id_reader;
+
+    SELECT count(lr.id_reader) INTO loans_premium
+    from loan l
+    JOIN physical_copy pc ON pc.id = l.id_physical_copy
+    JOIN branch b ON b.id = pc.id_branch
+    JOIN library_reader lr ON lr.id_library = b.id_library
+    WHERE lr.id_reader = NEW.id_reader AND lr.category = 'premium' and lr.id_library IN (
+          SELECT b.id_library
+          FROM physical_copy pc
+          JOIN branch b ON b.id = pc.id_branch
+          WHERE pc.id = NEW.id_physical_copy
+    )
+    GROUP BY lr.id_reader;
+
+    IF loans_base = 3 THEN
+        RAISE EXCEPTION 'Reader with category ''base'' cannot have more than 3 loans.';
+    END IF;
+
+    IF loans_premium = 5 THEN
+        RAISE EXCEPTION 'Reader with category ''premium'' cannot have more than 5 loans.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_ensure_max_loans
+BEFORE INSERT ON loan
+FOR EACH ROW
+EXECUTE FUNCTION ensure_max_loans();

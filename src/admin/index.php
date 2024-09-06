@@ -1,16 +1,13 @@
 <?php
 session_start();
+require_once 'check-logged.php';
 
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: login.php');
-    exit;
-}
 
 $username = $_SESSION['username'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
     session_destroy();
-    header('Location: login.php');
+    header('Location: /admin/login.php');
     exit;
 }
 ?>

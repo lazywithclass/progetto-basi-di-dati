@@ -3,6 +3,7 @@ session_start();
 require_once '../config.php';
 require_once 'check-logged.php';
 
+
 $db = get_connection();
 
 $query = "SELECT id_library FROM library_reader WHERE id_reader = $1";
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="container mt-4">
         <h1>Loan Books</h1>
-
+        <p>You could have as many loans as your library category allows, so for each library you could have a different limit</p>
         <form method="POST" class="mb-4">
             <div class="form-group">
                 <label for="search_term">Search by Title or ISBN:</label>
@@ -104,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <td>
                             <form action="loan-books.php" method="POST">
                                 <input type="hidden" name="id_physical_copy" value="<?php echo htmlspecialchars($book['id_physical_copy']); ?>">
-                                <button type="submit" name="loan" class="btn btn-success">Loan</button>
+                                <button type="submit" name="loan" class="btn btn-success">Loan request</button>
                             </form>
                         </td>
                     </tr>

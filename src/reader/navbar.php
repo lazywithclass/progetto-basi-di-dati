@@ -1,12 +1,13 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <h3><a class="navbar-brand" href="/admin">Quibreria</a></h3>
-    <div class="collapse navbar-collapse">
+    <h3><a class="navbar-brand" href="/reader">Quibreria</a></h3>
+    <div class="navbar-collapse">
         <ul class="navbar-nav mr-auto">
             <?php
             $currentUrl = $_SERVER['REQUEST_URI'];
 
             $navItems = [
-                ['label' => 'Loan books', 'link' => '/reader/loan-books.php']
+                ['label' => 'Loan books', 'link' => '/reader/loan-books.php'],
+                ['label' => 'Loaned books', 'link' => '/reader/loaned-books.php']
             ];
 
             foreach ($navItems as $item) {
@@ -20,7 +21,7 @@
         <span class="navbar-text mr-3">
             Logged in as <?php echo htmlspecialchars($_SESSION['username']); ?>
         </span>
-        <form class="form-inline my-2 my-lg-0" action="logout.php" method="post">
+        <form class="form-inline my-2 my-lg-0" action="/reader/logout.php" method="post">
             <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout">Logout</button>
         </form>
     </div>

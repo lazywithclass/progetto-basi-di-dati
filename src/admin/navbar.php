@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <h3><a class="navbar-brand" href="/admin">Quibreria</a></h3>
-    <div class="collapse navbar-collapse">
+    <div class="navbar-collapse">
         <ul class="navbar-nav mr-auto">
             <?php
             $currentUrl = $_SERVER['REQUEST_URI'];

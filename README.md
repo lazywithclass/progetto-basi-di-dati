@@ -9,7 +9,11 @@ $ ./scripts/php-start.sh
 
 ## Useful users to test the app
 
-Pippin has 5 overdue loans with two different branches, he's managed by Brooks.
+Pippin (5) has 5 overdue loans with two different branches, he's managed by Brooks (1).
+
+Gandalf (1) is premium in all libraries.
+
+Frodo (2) is premium in Rivendell (5)
 
 ## Notes
 
