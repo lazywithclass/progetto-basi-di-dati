@@ -40,8 +40,8 @@ CREATE TABLE author_book (
     id_author INT NOT NULL,
     id_book INT NOT NULL,
     PRIMARY KEY (id_author, id_book),
-    FOREIGN KEY (id_author) REFERENCES author(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE
+    FOREIGN KEY (id_author) REFERENCES author(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE reader (
@@ -73,8 +73,8 @@ CREATE TABLE physical_copy(
     id_book INTEGER NOT NULL,
     id_branch INTEGER NOT NULL,
     copies_number INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_branch) REFERENCES branch(id) ON DELETE CASCADE
+    FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE ON UPDATE CASCADE ,
+    FOREIGN KEY (id_branch) REFERENCES branch(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE loan (
@@ -134,15 +134,30 @@ INSERT INTO author (name, surname, bio, birth_date, death_date) VALUES
 ('John', 'Tolkien', 'J. R. R. Tolkien was an English writer, poet, philologist, and academic, best known as the author of the classic high-fantasy works The Hobbit, The Lord of the Rings, and The Silmarillion.', '1892-01-03', '1973-09-02'),
 ('Ernest', 'Hemingway', 'Ernest Hemingway was an American novelist, short-story writer, journalist, and sportsman. His economical and understated style had a strong influence on 20th-century fiction.', '1899-07-21', '1961-07-02'),
 ('Richard', 'Bach', 'Richard Bach is an American writer, widely known as the author of the hugely popular 1970s best-sellers Jonathan Livingston Seagull and Illusions: The Adventures of a Reluctant Messiah.', '1936-06-23', NULL),
-('Ken', 'Follett', 'Ken Follett is a Welsh author of thrillers and historical novels. He has sold more than 160 million copies of his works.', '1949-06-05', NULL);
+('Ken', 'Follett', 'Ken Follett is a Welsh author of thrillers and historical novels. He has sold more than 160 million copies of his works.', '1949-06-05', NULL),
+('George', 'Orwell', 'George Orwell was an English novelist, essayist, journalist, and critic, best known for his novels Animal Farm and Nineteen Eighty-Four.', '1903-06-25', '1950-01-21'),
+('Jane', 'Austen', 'Jane Austen was an English novelist known primarily for her six major novels, which interpret, critique, and comment upon the British landed gentry at the end of the 18th century.', '1775-12-16', '1817-07-18'),
+('Mark', 'Twain', 'Mark Twain was an American writer, humorist, entrepreneur, publisher, and lecturer, best known for his novels The Adventures of Tom Sawyer and its sequel, the Adventures of Huckleberry Finn.', '1835-11-30', '1910-04-21'),
+('Agatha', 'Christie', 'Agatha Christie was an English writer known for her sixty-six detective novels and fourteen short story collections, particularly those revolving around her fictional detectives Hercule Poirot and Miss Marple.', '1890-09-15', '1976-01-12')
 
 INSERT INTO book (isbn, title, publisher, plot) VALUES
 ('978-0618640157', 'The Lord of the Rings', 'George Allen & Unwin', 'An epic high-fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien''s 1937 fantasy novel The Hobbit, but eventually developed into a much larger work.'),
 ('978-0684801223', 'The Old Man and the Sea', 'Charles Scribner''s Sons', 'A short novel written by the American author Ernest Hemingway in 1951 in Cuba, and published in 1952. It tells the story of Santiago, an aging Cuban fisherman who struggles with a giant marlin far out in the Gulf Stream.'),
 ('978-0743278904', 'Jonathan Livingston Seagull', 'Macmillan', 'A fable about a seagull who is trying to learn about life and flight, and a homily about self-perfection. Richard Bach, a former US Air Force pilot, and avowed flying enthusiast who has written numerous works of fiction and non-fiction related to flight.'),
-('978-0451225245', 'The Pillars of the Earth', 'William Morrow & Company', 'A historical novel by Ken Follett, published in 1989, about the building of a cathedral in the fictional town of Kingsbridge, England. It is the first in the Kingsbridge Series.');
+('978-0451225245', 'The Pillars of the Earth', 'William Morrow & Company', 'A historical novel by Ken Follett, published in 1989, about the building of a cathedral in the fictional town of Kingsbridge, England. It is the first in the Kingsbridge Series.'),
+('978-0451524935', '1984', 'Secker & Warburg', 'A dystopian social science fiction novel and cautionary tale, written by the English writer George Orwell.'),
+('978-0141439518', 'Pride and Prejudice', 'T. Egerton, Whitehall', 'A romantic novel of manners written by Jane Austen.'),
+('978-0486280615', 'Adventures of Huckleberry Finn', 'Chatto & Windus / Charles L. Webster And Company', 'A novel by Mark Twain, first published in the United Kingdom in December 1884 and in the United States in February 1885.'),
+('978-0062073488', 'Murder on the Orient Express', 'Collins Crime Club', 'A detective novel by English writer Agatha Christie featuring the Belgian detective Hercule Poirot.'),
+('978-0439708180', 'Harry Potter and the Sorcerer\'s Stone', 'Bloomsbury', 'A fantasy novel written by British author J.K. Rowling.'),
+('978-0451526342', 'Animal Farm', 'Secker & Warburg', 'A satirical allegorical novella by George Orwell, first published in England on 17 August 1945.'),
+('978-0141439600', 'Sense and Sensibility', 'Thomas Egerton', 'A novel by Jane Austen, published in 1811. It was published anonymously; By A Lady appears on the title page where the author\'s name might have been.'),
+('978-0486280615', 'The Adventures of Tom Sawyer', 'American Publishing Company', 'A novel by Mark Twain about a young boy growing up along the Mississippi River.'),
+('978-0062073495', 'The ABC Murders', 'Collins Crime Club', 'A work of detective fiction by British writer Agatha Christie, featuring her character Hercule Poirot.'),
+('978-0439064873', 'Harry Potter and the Chamber of Secrets', 'Bloomsbury', 'The second novel in the Harry Potter series, written by J.K. Rowling.');
 
-INSERT INTO author_book (id_author, id_book) VALUES (1, 1), (2, 2), (3, 3), (4, 4);
+INSERT INTO author_book (id_author, id_book) VALUES
+(1, 1), (2, 2), (3, 3), (4, 4);
 
 INSERT INTO library (name) VALUES ('Shawshank Library');
 INSERT INTO library (name) VALUES ('Minas Tirith Library');
@@ -180,6 +195,7 @@ INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES
 (2, 1, 20), (2, 2, 20), (2, 3, 20), (2, 4, 20), (2, 5, 20), (2, 6, 20), (2, 7, 20), (2, 8, 20), (2, 9, 20), (2, 10, 20),
 (3, 1, 20), (3, 2, 20), (3, 3, 20), (3, 4, 20), (3, 5, 20), (3, 6, 20), (3, 7, 20), (3, 8, 20), (3, 9, 20), (3, 10, 20),
 (4, 1, 20), (4, 2, 20), (4, 3, 20), (4, 4, 20), (4, 5, 20), (4, 6, 20), (4, 7, 20), (4, 8, 20), (4, 9, 20), (4, 10, 20);
+
 
 -- Materialized views
 

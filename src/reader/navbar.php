@@ -21,6 +21,9 @@
         <span class="navbar-text mr-3">
             Logged in as <?php echo htmlspecialchars($_SESSION['username']); ?>
         </span>
+        <span class="navbar-text mr-3">
+            <a href="change_password.php">Change your password</a>
+        </span>
         <form class="form-inline my-2 my-lg-0" action="/reader/logout.php" method="post">
             <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout">Logout</button>
         </form>

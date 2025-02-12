@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <h3><a class="navbar-brand" href="/admin">Quibreria</a></h3>
     <div class="navbar-collapse">
         <ul class="navbar-nav mr-auto">
@@ -22,6 +22,9 @@
         </ul>
         <span class="navbar-text mr-3">
             Logged in as <?php echo htmlspecialchars($_SESSION['username']); ?>
+        </span>
+        <span class="navbar-text mr-3">
+            <a href="change_password.php">Change your password</a>
         </span>
         <form class="form-inline my-2 my-lg-0" action="logout.php" method="post">
             <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" name="logout">Logout</button>

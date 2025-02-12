@@ -7,9 +7,6 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.php
     pkgs.postgresql
-    pkgs.dbeaver
+    pkgs.dbeaver-bin
   ];
-
-  shellHook = ''
-  '';
 }

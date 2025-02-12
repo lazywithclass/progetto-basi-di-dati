@@ -10,6 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
     header('Location: /admin/login.php');
     exit;
 }
+
+// small easter egg
+if ($username == "conan") {
+    $username = "Conan The Librarian";
+}
 ?>
 
 <!DOCTYPE html>
