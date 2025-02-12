@@ -3,3 +3,4 @@
 pgsql/data
 pgsql/logfile
 .pg
+.idea
