@@ -18,20 +18,6 @@ if ($result) {
     }
 }
 
-// Fetching branches
-$query = "SELECT branch.id, branch.city, branch.address, library.name AS library_name
-          FROM branch
-          JOIN library ON branch.id_library = library.id";
-$result = pg_prepare($db, 'select_branches', $query);
-$result = pg_execute($db, 'select_branches', array());
-
-$branches = [];
-if ($result) {
-    while ($row = pg_fetch_assoc($result)) {
-        $branches[] = $row;
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $id_library = $_POST['id_library'];
     $city = $_POST['city'];
@@ -41,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $result = pg_prepare($db, 'insert_branch', $query);
     $result = pg_execute($db, 'insert_branch', array($id_library, $city, $address));
 
-    // TOO handle error
+    // TODO handle error
     header('Location: manage-branches.php');
     exit;
 }
@@ -56,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $result = pg_prepare($db, 'update_branch', $query);
     $result = pg_execute($db, 'update_branch', array($id, $id_library, $city, $address));
 
-    // TOO handle error
+    // TODO handle error
     header('Location: manage-branches.php');
     exit;
 }
@@ -68,7 +54,7 @@ if (isset($_GET['delete'])) {
     $result = pg_prepare($db, 'delete_branch', $query);
     $result = pg_execute($db, 'delete_branch', array($id));
 
-    // TOO handle error
+    // TODO handle error
     header('Location: manage-branches.php');
     exit;
 }
@@ -82,6 +68,37 @@ if (isset($_GET['edit'])) {
     $result = pg_execute($db, 'select_branch_by_id', array($id));
     if ($result) {
         $editBranch = pg_fetch_assoc($result);
+    }
+}
+
+$search = $_GET['search'] ?? '';
+if (!empty($search)) {
+    $searchQuery = " ";
+    $params = [];
+    $params[] = "%$search%";
+
+    // TODO
+//    POSSIBLE new QUERY
+//    SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*),  COUNT(distinct bo.isbn)
+//    FROM branch b
+//    join physical_copy pc on pc.id_branch = b.id
+//    join book bo on bo.id = pc.id_book
+//    JOIN library l ON b.id_library = l.id
+//    group by b.id, bo.isbn, b.id, b.city, b.address, l.name
+
+    $query = "
+        SELECT branch.id, branch.city, branch.address, library.name AS library_name
+        FROM branch
+        JOIN library ON branch.id_library = library.id
+        WHERE branch.city ILIKE $1 OR branch.address ILIKE $1 OR library.name ILIKE $1";
+
+    $result = pg_prepare($db, 'select_branches', $query);
+    $result = pg_execute($db, 'select_branches', $params);
+    $branches = [];
+    if ($result) {
+        while ($row = pg_fetch_assoc($result)) {
+            $branches[] = $row;
+        }
     }
 }
 ?>
@@ -128,8 +145,17 @@ if (isset($_GET['edit'])) {
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($editBranch['id']); ?>">
                 <button type="submit" name="update" class="btn btn-secondary">Update Branch</button>
             <?php else: ?>
-                <button type="submit" name="create" class="btn btn-primary">Add Branch</button>
+                <button type="submit" name="create" class="btn btn-success">Add Branch</button>
             <?php endif; ?>
+        </form>
+
+        <form method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search by city, address, or library" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
         </form>
 
         <h2>Branches List</h2>
@@ -155,6 +181,11 @@ if (isset($_GET['edit'])) {
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php
+                if (empty($branches)) {
+                    echo "<tr><td colspan='4' class='text-center'>No branches found.</td></tr>";
+                }
+                ?>
             </tbody>
         </table>
     </div>

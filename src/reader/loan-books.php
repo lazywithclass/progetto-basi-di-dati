@@ -23,8 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $searchTerm = $_POST['search_term'];
 
         $query = "
-          SELECT b.*, pc.id as id_physical_copy, br.*
+          SELECT b.*, pc.id as id_physical_copy, br.*, a.name || ' ' || a.surname as author
           FROM book b
+          JOIN author_book ab ON b.id = ab.id_book
+          JOIN author a ON a.id = ab.id_author
           JOIN physical_copy pc ON pc.id_book = b.id
           JOIN branch br ON br.id = pc.id_branch
           WHERE br.id_library = ANY($1) AND (b.title ILIKE $2 OR b.isbn ILIKE $2)";
@@ -89,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <thead>
                     <tr>
                         <th>Title</th>
-                        <th>ISBN</th>
+                        <th>Author</th>
                         <th>Branch City</th>
                         <th>Branch Address</th>
                         <th>Action</th>
@@ -98,8 +100,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <tbody>
                     <?php foreach ($searchResults as $book): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($book['title']); ?></td>
-                        <td><?php echo htmlspecialchars($book['isbn']); ?></td>
+                        <td>
+                            <?php echo htmlspecialchars($book['title']); ?><br />
+                            <?php echo htmlspecialchars($book['isbn']); ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($book['author']); ?></td>
                         <td><?php echo htmlspecialchars($book['city']); ?></td>
                         <td><?php echo htmlspecialchars($book['address']); ?></td>
                         <td>

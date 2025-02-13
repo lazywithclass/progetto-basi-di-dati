@@ -112,6 +112,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php
+                if (empty($loans)) {
+                    echo "<tr><td colspan='7' class='text-center'>No loans found.</td></tr>";
+                }
+                ?>
             </tbody>
         </table>
     </div>

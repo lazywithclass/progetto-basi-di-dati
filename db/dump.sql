@@ -138,7 +138,7 @@ INSERT INTO author (name, surname, bio, birth_date, death_date) VALUES
 ('George', 'Orwell', 'George Orwell was an English novelist, essayist, journalist, and critic, best known for his novels Animal Farm and Nineteen Eighty-Four.', '1903-06-25', '1950-01-21'),
 ('Jane', 'Austen', 'Jane Austen was an English novelist known primarily for her six major novels, which interpret, critique, and comment upon the British landed gentry at the end of the 18th century.', '1775-12-16', '1817-07-18'),
 ('Mark', 'Twain', 'Mark Twain was an American writer, humorist, entrepreneur, publisher, and lecturer, best known for his novels The Adventures of Tom Sawyer and its sequel, the Adventures of Huckleberry Finn.', '1835-11-30', '1910-04-21'),
-('Agatha', 'Christie', 'Agatha Christie was an English writer known for her sixty-six detective novels and fourteen short story collections, particularly those revolving around her fictional detectives Hercule Poirot and Miss Marple.', '1890-09-15', '1976-01-12')
+('Agatha', 'Christie', 'Agatha Christie was an English writer known for her sixty-six detective novels and fourteen short story collections, particularly those revolving around her fictional detectives Hercule Poirot and Miss Marple.', '1890-09-15', '1976-01-12');
 
 INSERT INTO book (isbn, title, publisher, plot) VALUES
 ('978-0618640157', 'The Lord of the Rings', 'George Allen & Unwin', 'An epic high-fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien''s 1937 fantasy novel The Hobbit, but eventually developed into a much larger work.'),
@@ -149,15 +149,24 @@ INSERT INTO book (isbn, title, publisher, plot) VALUES
 ('978-0141439518', 'Pride and Prejudice', 'T. Egerton, Whitehall', 'A romantic novel of manners written by Jane Austen.'),
 ('978-0486280615', 'Adventures of Huckleberry Finn', 'Chatto & Windus / Charles L. Webster And Company', 'A novel by Mark Twain, first published in the United Kingdom in December 1884 and in the United States in February 1885.'),
 ('978-0062073488', 'Murder on the Orient Express', 'Collins Crime Club', 'A detective novel by English writer Agatha Christie featuring the Belgian detective Hercule Poirot.'),
-('978-0439708180', 'Harry Potter and the Sorcerer\'s Stone', 'Bloomsbury', 'A fantasy novel written by British author J.K. Rowling.'),
 ('978-0451526342', 'Animal Farm', 'Secker & Warburg', 'A satirical allegorical novella by George Orwell, first published in England on 17 August 1945.'),
-('978-0141439600', 'Sense and Sensibility', 'Thomas Egerton', 'A novel by Jane Austen, published in 1811. It was published anonymously; By A Lady appears on the title page where the author\'s name might have been.'),
-('978-0486280615', 'The Adventures of Tom Sawyer', 'American Publishing Company', 'A novel by Mark Twain about a young boy growing up along the Mississippi River.'),
-('978-0062073495', 'The ABC Murders', 'Collins Crime Club', 'A work of detective fiction by British writer Agatha Christie, featuring her character Hercule Poirot.'),
-('978-0439064873', 'Harry Potter and the Chamber of Secrets', 'Bloomsbury', 'The second novel in the Harry Potter series, written by J.K. Rowling.');
+('978-0141439600', 'Sense and Sensibility', 'Thomas Egerton', 'A novel by Jane Austen, published in 1811. It was published anonymously; By A Lady appears on the title page where the author name might have been.'),
+('978-0486280616', 'The Adventures of Tom Sawyer', 'American Publishing Company', 'A novel by Mark Twain about a young boy growing up along the Mississippi River.'),
+('978-0062073495', 'The ABC Murders', 'Collins Crime Club', 'A work of detective fiction by British writer Agatha Christie, featuring her character Hercule Poirot.');
 
 INSERT INTO author_book (id_author, id_book) VALUES
-(1, 1), (2, 2), (3, 3), (4, 4);
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(6, 6),
+(7, 7),
+(8, 8),
+(5, 9),
+(6, 10),
+(7, 11),
+(8, 12);
 
 INSERT INTO library (name) VALUES ('Shawshank Library');
 INSERT INTO library (name) VALUES ('Minas Tirith Library');

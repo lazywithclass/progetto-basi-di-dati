@@ -7,7 +7,8 @@ require_once 'lib/reader.php';
 
 $db = get_connection();
 
-$readers = find_readers_for_librarian($_SESSION['id']);
+$search = $_GET['search'] ?? '';
+$readers = find_readers_for_librarian($_SESSION['id'], $search);
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (isset($_POST['reset'])) {
         // TODO
-        echo("AAAAAAAAAAAAAAA");
     }
 }
 
@@ -134,7 +134,7 @@ if (isset($_GET['reset-overdue'])) {
             <?php if (isset($editReader)): ?>
                 <button type="submit" name="update" class="btn btn-secondary">Update Reader</button>
             <?php else: ?>
-                <button type="submit" name="create" class="btn btn-primary">Add Reader</button>
+                <button type="submit" name="create" class="btn btn-success">Add Reader</button>
             <?php endif; ?>
         </form>
         <?php if (!empty($error)): ?>
@@ -142,6 +142,15 @@ if (isset($_GET['reset-overdue'])) {
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
+
+        <form method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search by username, name, or surname" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
 
         <h2>Readers List</h2>
         <p>Listed here are readers that are registered to your libraries</p>
@@ -173,6 +182,11 @@ if (isset($_GET['reset-overdue'])) {
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php
+                if (empty($readers)) {
+                    echo "<tr><td colspan='7' class='text-center'>No readers found.</td></tr>";
+                }
+                ?>
             </tbody>
         </table>
     </div>

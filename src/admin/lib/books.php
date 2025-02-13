@@ -68,11 +68,19 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
     return [pg_last_error($db)];
 }
 
-function find_books_for_librarian($librarianId) {
+function find_books_for_librarian($librarianId, $search_term) {
+    if (empty($search_term)) {
+        return [];
+    }
     $db = get_connection();
-    $query = "SELECT * FROM librarian_books WHERE id_librarian = $1";
+    $params = [];
+    $params[] = "$librarianId";
+    $params[] = "%$search_term%";
+    $query = "SELECT * FROM librarian_books WHERE id_librarian = $1 AND (title ILIKE $2 OR isbn ILIKE $2)";
     $result = pg_prepare($db, 'select_books_for_librarian', $query);
-    $result = pg_execute($db, 'select_books_for_librarian', array($librarianId));
+    $result = pg_execute($db, 'select_books_for_librarian', $params);
+
+    echo pg_last_error($db);
 
     $books = [];
     while ($row = pg_fetch_assoc($result)) {
