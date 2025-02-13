@@ -30,9 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $publisher = $_POST['publisher'];
         $plot = $_POST['plot'];
         $selected_authors = $_POST['authors'];
-        $copies_number = $_POST['copies_number'];
 
-        insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
+        insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors);
 
         // TOO handle error
         header('Location: manage-books.php');
@@ -47,9 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $publisher = $_POST['publisher'];
         $plot = $_POST['plot'];
         $selected_authors = $_POST['authors'];
-        $copies_number = $_POST['copies_number'];
 
-        update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number);
+        update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors);
 
         // TOO handle error
         header('Location: manage-books.php');
@@ -98,21 +96,11 @@ if (isset($_GET['edit'])) {
     } else {
         $error = pg_last_error($db);
     }
-
-    $query = "SELECT copies_number FROM physical_copy WHERE id_book = $1";
-    $result = pg_prepare($db, 'select_copies_query', $query);
-    $result = pg_execute($db, 'select_copies_query', array($id));
-    $editBook['copies_number'] = pg_fetch_assoc($result)['copies_number'];
-
-    if (!$result) {
-        $error = pg_last_error($db);
-    }
 }
 
 $branches = find_librarian_branches($_SESSION['id']);
 $search = $_GET['search'] ?? '';
 $books = find_books_for_librarian($_SESSION['id'], $search);
-
 ?>
 
 <!DOCTYPE html>
@@ -172,10 +160,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Copies number:</label>
-                <input type="text" name="copies_number" class="form-control" value="<?php echo htmlspecialchars($editBook['copies_number'] ?? ''); ?>" required>
-            </div>
             <?php if (isset($editBook)): ?>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($editBook['id']); ?>">
                 <button type="submit" name="update" class="btn btn-secondary">Update Book</button>
@@ -208,7 +192,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                     <th>Publisher</th>
                     <th>Plot</th>
                     <th>Branch</th>
-                    <th>Copies</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -220,7 +203,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                     <td><?php echo htmlspecialchars($book['publisher']); ?></td>
                     <td><?php echo htmlspecialchars($book['plot']); ?></td>
                     <td><?php echo htmlspecialchars($book['branch_name']); ?></td>
-                    <td><?php echo htmlspecialchars($book['copies_number']); ?></td>
                     <td class="text-nowrap">
                         <a href="?edit=<?php echo $book['id']; ?>" class="btn btn-info btn-sm">Edit</a>
                         <a href="?delete=<?php echo $book['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>

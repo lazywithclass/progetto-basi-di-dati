@@ -72,7 +72,6 @@ CREATE TABLE physical_copy(
     id SERIAL PRIMARY KEY,
     id_book INTEGER NOT NULL,
     id_branch INTEGER NOT NULL,
-    copies_number INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (id_book) REFERENCES book(id) ON DELETE CASCADE ON UPDATE CASCADE ,
     FOREIGN KEY (id_branch) REFERENCES branch(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -199,11 +198,60 @@ INSERT INTO branch (id_library, city, address) VALUES (4, 'Alderaan', '222 Peace
 INSERT INTO branch (id_library, city, address) VALUES (5, 'Rivendell', '333 Elven Path');
 INSERT INTO branch (id_library, city, address) VALUES (5, 'Lothlórien', '444 Golden Forest');
 
-INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES
-(1, 1, 20), (1, 2, 20), (1, 3, 20), (1, 4, 20), (1, 5, 20), (1, 6, 20), (1, 7, 20), (1, 8, 20), (1, 9, 20), (1, 10, 20),
-(2, 1, 20), (2, 2, 20), (2, 3, 20), (2, 4, 20), (2, 5, 20), (2, 6, 20), (2, 7, 20), (2, 8, 20), (2, 9, 20), (2, 10, 20),
-(3, 1, 20), (3, 2, 20), (3, 3, 20), (3, 4, 20), (3, 5, 20), (3, 6, 20), (3, 7, 20), (3, 8, 20), (3, 9, 20), (3, 10, 20),
-(4, 1, 20), (4, 2, 20), (4, 3, 20), (4, 4, 20), (4, 5, 20), (4, 6, 20), (4, 7, 20), (4, 8, 20), (4, 9, 20), (4, 10, 20);
+-- creation of all physical copies
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 1),(2, 1),
+(3, 1),(3, 1),(3, 1),
+(4, 1),(4, 1),(4, 1),(4, 1);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 2),(2, 2),
+(3, 2),(3, 2),(3, 2),
+(4, 2),(4, 2),(4, 2),(4, 2);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 3),
+(2, 3),(2, 3),
+(3, 3),(3, 3),(3, 3),
+(4, 3),(4, 3),(4, 3),(4, 3);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 4),
+(2, 4),(2, 4),
+(3, 4),(3, 4),(3, 4),
+(4, 4),(4, 4),(4, 4),(4, 4);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 5),(2, 5),
+(3, 5),(3, 5),(3, 5),
+(4, 5),(4, 5),(4, 5),(4, 5);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 6),(2, 6),
+(3, 6),(3, 6),(3, 6),
+(4, 6),(4, 6),(4, 6),(4, 6);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 7),(2, 7),
+(3, 7),(3, 7),(3, 7),
+(4, 7),(4, 7),(4, 7),(4, 7);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(2, 8),(2, 8),
+(3, 8),(3, 8),(3, 8),
+(4, 8),(4, 8),(4, 8),(4, 8);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 9),
+(2, 9),(2, 9),
+(3, 9),(3, 9),(3, 9),
+(4, 9),(4, 9),(4, 9),(4, 9);
+
+INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 10),
+(2, 10),(2, 10),
+(3, 10),(3, 10),(3, 10),
+(4, 10),(4, 10),(4, 10),(4, 10);
 
 
 -- Materialized views

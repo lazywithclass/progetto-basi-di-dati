@@ -3,7 +3,7 @@ require_once '../config.php';
 
 // TODO consider using TRANSACTIONS
 
-function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number) {
+function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors) {
     $db = get_connection();
     $query = "UPDATE book SET isbn = $1, title = $2, publisher = $3, plot = $4 WHERE id = $5";
     $result = pg_prepare($db, 'update_book_query', $query);
@@ -30,14 +30,10 @@ function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publish
         }
     }
 
-    $query = "UPDATE physical_copy SET copies_number = $3 WHERE id_book = $1 AND id_branch = $2";
-    $result = pg_prepare($db, 'update_physical_copy_query', $query);
-    $result = pg_execute($db, 'update_physical_copy_query', array($id_book, $id_branch, $copies_number));
-
-    return [pg_last_error($db)];
+    return [];
 }
 
-function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors, $copies_number) {
+function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors) {
     $db = get_connection();
     $query = "INSERT INTO book (isbn, title, publisher, plot) VALUES ($1, $2, $3, $4) RETURNING id";
     $result = pg_prepare($db, 'insert_book_query', $query);
@@ -61,9 +57,9 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
         }
     }
 
-    $query = "INSERT INTO physical_copy (id_book, id_branch, copies_number) VALUES ($1, $2, $3)";
+    $query = "INSERT INTO physical_copy (id_book, id_branch) VALUES ($1, $2)";
     $result = pg_prepare($db, 'insert_physical_copy_query', $query);
-    $result = pg_execute($db, 'insert_physical_copy_query', array($id_book, $id_branch, $copies_number));
+    $result = pg_execute($db, 'insert_physical_copy_query', array($id_book, $id_branch));
 
     return [pg_last_error($db)];
 }
