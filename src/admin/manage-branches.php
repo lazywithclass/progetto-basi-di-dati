@@ -77,20 +77,15 @@ if (!empty($search)) {
     $params = [];
     $params[] = "%$search%";
 
-    // TODO
-//    POSSIBLE new QUERY
-//    SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*),  COUNT(distinct bo.isbn)
-//    FROM branch b
-//    join physical_copy pc on pc.id_branch = b.id
-//    join book bo on bo.id = pc.id_book
-//    JOIN library l ON b.id_library = l.id
-//    group by b.id, bo.isbn, b.id, b.city, b.address, l.name
-
     $query = "
-        SELECT branch.id, branch.city, branch.address, library.name AS library_name
-        FROM branch
-        JOIN library ON branch.id_library = library.id
-        WHERE branch.city ILIKE $1 OR branch.address ILIKE $1 OR library.name ILIKE $1";
+        SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*) as total_copies, COUNT(distinct bo.isbn) as total_distinct_isbn, COUNT(lo.id) as active_loans
+        FROM branch b
+        JOIN physical_copy pc ON pc.id_branch = b.id
+        JOIN book bo ON bo.id = pc.id_book
+        JOIN library l ON b.id_library = l.id
+        LEFT JOIN loan lo ON lo.id_physical_copy = pc.id
+        GROUP BY b.id, l.name, lo.id
+        HAVING b.city ILIKE $1 OR b.address ILIKE $1 OR l.name ILIKE $1";
 
     $result = pg_prepare($db, 'select_branches', $query);
     $result = pg_execute($db, 'select_branches', $params);
@@ -166,6 +161,9 @@ if (!empty($search)) {
                     <th>Library</th>
                     <th>City</th>
                     <th>Address</th>
+                    <th>Total copies</th>
+                    <th>Total distinct ISBNs</th>
+                    <th>Active loans</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -175,7 +173,11 @@ if (!empty($search)) {
                     <td><?php echo htmlspecialchars($branch['library_name']); ?></td>
                     <td><?php echo htmlspecialchars($branch['city']); ?></td>
                     <td><?php echo htmlspecialchars($branch['address']); ?></td>
+                    <td><?php echo htmlspecialchars($branch['total_copies']); ?></td>
+                    <td><?php echo htmlspecialchars($branch['total_distinct_isbn']); ?></td>
+                    <td><?php echo htmlspecialchars($branch['active_loans']); ?></td>
                     <td class="text-nowrap">
+                        <a href="manage-branches-late-returns-report.php?id_branch=<?php echo $branch['id']; ?>" class="btn btn-info btn-sm">Late returns report</a>
                         <a href="?edit=<?php echo $branch['id']; ?>" class="btn btn-info btn-sm">Edit</a>
                         <a href="?delete=<?php echo $branch['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this branch?')">Delete</a>
                     </td>
@@ -183,7 +185,7 @@ if (!empty($search)) {
                 <?php endforeach; ?>
                 <?php
                 if (empty($branches)) {
-                    echo "<tr><td colspan='4' class='text-center'>No branches found.</td></tr>";
+                    echo "<tr><td colspan='7' class='text-center'>No branches found</td></tr>";
                 }
                 ?>
             </tbody>
