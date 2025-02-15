@@ -21,8 +21,8 @@ $searchResults = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['search'])) {
         $searchTerm = $_POST['search_term'];
-        // records with no availability are naturally excluded thanks
-        // to the join with physical copy
+        // we do not show copies that are already loaned
+        // but still we have a trigger that protects against race conditions
         $query = "
             SELECT 
                 pc.id as id_physical_copy,
@@ -37,8 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             JOIN author a ON a.id = ab.id_author
             JOIN physical_copy pc ON pc.id_book = b.id
             JOIN branch br ON br.id = pc.id_branch
-            WHERE br.id_library = ANY($1) AND (b.title ILIKE $2 OR b.isbn ILIKE $2)
-            GROUP BY b.id, a.id, br.id, pc.id";
+            LEFT JOIN loan l ON l.id_physical_copy = pc.id AND l.is_returned = FALSE
+            WHERE 
+                br.id_library = ANY($1) 
+                AND (b.title ILIKE $2 OR b.isbn ILIKE $2)
+                AND (l.id IS NULL OR l.is_returned = TRUE)  -- exclude copies that have an active loan
+            GROUP BY b.id, a.id, br.id, pc.id;";
 
         $result = pg_prepare($db, 'search_books_query', $query);
         $result = pg_execute($db, 'search_books_query', array('{' . implode(',', $userLibraries) . '}', '%' . $searchTerm . '%'));
@@ -93,13 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Books</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <?php include '../header-libraries.php'; ?>
 </head>
 <body>
 

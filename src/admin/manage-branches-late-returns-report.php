@@ -6,13 +6,9 @@ require_once 'check-logged.php';
 $db = get_connection();
 
 $query = "
-    SELECT b.id AS id_branch, b.id_library, lr.id_library, lr.overdue_returns
-    FROM branch b
-    JOIN library l ON l.id = b.id_library 
-    JOIN library_reader lr ON lr.id_library = l.id
-    GROUP BY b.id, lr.id_library, lr.id_reader, lr.overdue_returns
-    HAVING b.id = $1 AND lr.overdue_returns > 0
-    ORDER BY lr.overdue_returns DESC";
+    SELECT *
+    FROM overdue_readers_view
+    WHERE id_branch = $1";
 
 $id_branch = $_GET['id_branch'];
 $result = pg_prepare($db, 'select_late_returns', $query);
@@ -30,7 +26,7 @@ $output = fopen('php://output', 'w');
 fputcsv($output, ['Branch ID', 'Library ID', 'Reader ID', 'Overdue Returns']);
 
 while ($row = pg_fetch_assoc($result)) {
-    fputcsv($output, [$row['id_branch'], $row['id_library'], $row['id_library'], $row['overdue_returns']]);
+    fputcsv($output, [$row['id_branch'], $row['id_library'], $row['id_reader'], $row['overdue_returns']]);
 }
 
 fclose($output);

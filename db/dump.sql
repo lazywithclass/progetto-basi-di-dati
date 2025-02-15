@@ -83,6 +83,7 @@ CREATE TABLE loan (
     start_date DATE NOT NULL,
     end_date DATE,
     length INTEGER NOT NULL,
+    is_returned BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_reader) REFERENCES reader(id),
     FOREIGN KEY (id_physical_copy) REFERENCES physical_copy(id)
 );
@@ -180,9 +181,7 @@ INSERT INTO library_reader (id_reader, id_library, category) VALUES (1, 1, 'prem
 INSERT INTO library_reader (id_reader, id_library, category) VALUES (2, 1, 'base'), (2, 2, 'base'), (2, 3, 'base'), (2, 4, 'base'), (2, 5, 'premium');
 INSERT INTO library_reader (id_reader, id_library) VALUES (3, 2), (3, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (4, 2), (4, 5);
-INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (5, 2, 5), (5, 5, 5);
-INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (6, 2, 2), (6, 5, 4);
-INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES (7, 2, 3), (7, 5, 3);
+INSERT INTO library_reader (id_reader, id_library) VALUES (7, 2), (7, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (8, 2), (8, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (9, 1), (9, 2), (9, 3), (9, 4), (9, 5);
 INSERT INTO library_reader (id_reader, id_library) VALUES (10, 1), (10, 2), (10, 3), (10, 4), (10, 5);
@@ -253,8 +252,19 @@ INSERT INTO physical_copy (id_book, id_branch) VALUES
 (3, 10),(3, 10),(3, 10),
 (4, 10),(4, 10),(4, 10),(4, 10);
 
+-- pippin and gimli have late returns
+INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES
+                                                                        (5, 2, 1), (5, 5, 0);
+INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES
+                                                                        (6, 2, 2), (6, 5, 0);
+-- pippin's loans
+INSERT INTO loan (id_reader, id_physical_copy, start_date, end_date, length, is_returned) VALUES
+    (5, 27, '2010-01-01', '2011-01-01', 14, TRUE);
+-- gimli's loans
+INSERT INTO loan (id_reader, id_physical_copy, start_date, end_date, length, is_returned) VALUES
+    (6, 30, '2020-03-01', NULL, 14, FALSE);
 
--- Materialized views
+-- Views
 
 CREATE MATERIALIZED VIEW librarian_books AS
   WITH librarian_branches AS (
@@ -262,10 +272,32 @@ CREATE MATERIALIZED VIEW librarian_books AS
     FROM branch br
     JOIN library_librarian lb ON br.id_library = lb.id_library
   )
-  SELECT DISTINCT b.*, lb.id_librarian
-  FROM book b
-  JOIN physical_copy pc ON pc.id_book = b.id
-  JOIN librarian_branches lb ON pc.id_branch = lb.id_branch;
+SELECT DISTINCT b.*, lb.id_librarian
+FROM book b
+JOIN physical_copy pc ON pc.id_book = b.id
+JOIN librarian_branches lb ON pc.id_branch = lb.id_branch;
+
+CREATE MATERIALIZED VIEW branch_stats AS
+SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*) as total_copies, COUNT(distinct bo.isbn) as total_distinct_isbn, COUNT(lo.id) as active_loans
+FROM branch b
+JOIN physical_copy pc ON pc.id_branch = b.id
+JOIN book bo ON bo.id = pc.id_book
+JOIN library l ON b.id_library = l.id
+LEFT JOIN loan lo ON lo.id_physical_copy = pc.id
+GROUP BY b.id, l.name, lo.id;
+
+CREATE VIEW overdue_readers_view AS
+SELECT
+    b.id AS id_branch,
+    l.id AS id_library,
+    lr.id_reader,
+    lr.overdue_returns
+FROM branch b
+         JOIN library l ON l.id = b.id_library
+         JOIN library_reader lr ON lr.id_library = l.id
+GROUP BY b.id, lr.id_reader, l.id, lr.overdue_returns
+HAVING lr.overdue_returns > 0
+ORDER BY lr.overdue_returns DESC;
 
 -- Functions and triggers
 
@@ -363,3 +395,81 @@ CREATE TRIGGER trigger_ensure_max_loans
 BEFORE INSERT ON loan
 FOR EACH ROW
 EXECUTE FUNCTION ensure_max_loans();
+
+--
+
+CREATE OR REPLACE FUNCTION update_overdue_returns()
+RETURNS TRIGGER AS $$
+DECLARE
+    library_id INTEGER;
+BEGIN
+    -- also update end_date
+    NEW.end_date := CURRENT_DATE;
+
+    -- we want to add the overdue return for the single library
+    -- where the user was late, not all of them to which they belong
+    SELECT b.id_library INTO library_id
+    FROM physical_copy pc
+    JOIN branch b ON pc.id_branch = b.id
+    WHERE pc.id = NEW.id_physical_copy;
+
+    IF NEW.end_date > (NEW.start_date + NEW.length) THEN
+        UPDATE library_reader
+        SET overdue_returns = overdue_returns + 1
+        WHERE id_reader = NEW.id_reader AND id_library = library_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER loan_return_trigger
+BEFORE UPDATE ON loan
+FOR EACH ROW
+WHEN (NEW.is_returned = TRUE)
+EXECUTE FUNCTION update_overdue_returns();
+
+--
+
+CREATE OR REPLACE FUNCTION check_physical_copy_availability()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM loan
+        WHERE id_physical_copy = NEW.id_physical_copy
+        AND is_returned = FALSE
+    ) THEN
+    RAISE EXCEPTION 'The requested physical copy is currently on loan';
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prevent_duplicate_loans
+BEFORE INSERT ON loan
+FOR EACH ROW
+EXECUTE FUNCTION check_physical_copy_availability();
+
+--
+
+CREATE OR REPLACE FUNCTION extend_loan(id_loan INTEGER)
+RETURNS TEXT AS $$
+DECLARE
+    due_date DATE;
+BEGIN
+    SELECT start_date + length INTO due_date
+    FROM loan
+    WHERE id = id_loan;
+
+    IF due_date < CURRENT_DATE THEN
+        RAISE EXCEPTION 'Loan is already overdue and cannot be extended';
+    END IF;
+
+    UPDATE loan SET length = length + 7 WHERE id = id_loan;
+    RETURN 'Loan extended successfully';
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+

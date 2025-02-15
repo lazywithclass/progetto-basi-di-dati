@@ -73,20 +73,12 @@ if (isset($_GET['edit'])) {
 
 $search = $_GET['search'] ?? '';
 if (!empty($search)) {
-    $searchQuery = " ";
+    $result = pg_prepare($db, 'refresh_branch_stats', "REFRESH MATERIALIZED VIEW branch_stats;");
+    $result = pg_execute($db, 'refresh_branch_stats', []);
+
     $params = [];
     $params[] = "%$search%";
-
-    $query = "
-        SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*) as total_copies, COUNT(distinct bo.isbn) as total_distinct_isbn, COUNT(lo.id) as active_loans
-        FROM branch b
-        JOIN physical_copy pc ON pc.id_branch = b.id
-        JOIN book bo ON bo.id = pc.id_book
-        JOIN library l ON b.id_library = l.id
-        LEFT JOIN loan lo ON lo.id_physical_copy = pc.id
-        GROUP BY b.id, l.name, lo.id
-        HAVING b.city ILIKE $1 OR b.address ILIKE $1 OR l.name ILIKE $1";
-
+    $query = "SELECT * FROM branch_stats WHERE city ILIKE $1 OR address ILIKE $1 OR library_name ILIKE $1;";
     $result = pg_prepare($db, 'select_branches', $query);
     $result = pg_execute($db, 'select_branches', $params);
     $branches = [];
@@ -101,13 +93,8 @@ if (!empty($search)) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Branches</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <?php include '../header-libraries.php'; ?>
 </head>
 <body>
 

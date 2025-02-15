@@ -11,7 +11,7 @@ $ ./scripts/php-start.sh
 
 ## Useful users to test the app
 
-Pippin (5) has 5 overdue loans with two different branches, he's managed by Brooks (1).
+Pippin and Gimli have overdue loans.
 
 Gandalf (1) is premium in all libraries.
 
