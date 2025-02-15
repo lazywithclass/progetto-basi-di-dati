@@ -60,10 +60,10 @@ Sono presenti copie fisiche per i primi 4 libri:
 
 distribuite in tutte le 10 sedi:
  
- * The Lord of the Rings (1) ne ha sempre una
- * The Old Man and the Sea (2) ne ha sempre due 
- * Jonathan Livingston Seagull (3) ne ha sempre tre
- * The Pillars of the Earth (4) ne ha sempre quattro
+ * The Lord of the Rings (1) e' sempre presente con una copia
+ * The Old Man and the Sea (2) e' sempre presente con due copie
+ * Jonathan Livingston Seagull (3) e' sempre presente con tre copie
+ * The Pillars of the Earth (4) e' sempre presente con quattro copie
 
 ## Note d'uso
 
