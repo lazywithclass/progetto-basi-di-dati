@@ -63,35 +63,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-                <h1>Change Password</h1>
-                <div class="card-body">
-                    <?php if (!empty($result)): ?>
-                        <div class="alert <?= $error ? 'alert-danger' : 'alert-success' ?>" role="alert">
-                            <?= htmlspecialchars($result); ?>
-                        </div>
-                    <?php endif; ?>
+            <h1>Change Password</h1>
+            <div class="card-body">
+                <?php if (!empty($result)): ?>
+                    <div class="alert <?= $error ? 'alert-danger' : 'alert-success' ?>" role="alert">
+                        <?= htmlspecialchars($result); ?>
+                    </div>
+                <?php endif; ?>
 
-                    <form method="post" action="change_password.php">
-                        <input type="hidden" name="librarian_id" value="<?= $_SESSION['id'] ?>">
+                <form method="post" action="change_password.php">
+                    <input type="hidden" name="librarian_id" value="<?= $_SESSION['id'] ?>">
 
-                        <div class="form-group">
-                            <label for="old_password">Old Password</label>
-                            <input type="password" id="old_password" name="old_password" class="form-control" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="old_password">Old Password</label>
+                        <input type="password" id="old_password" name="old_password" class="form-control" required>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="new_password">New Password</label>
-                            <input type="password" id="new_password" name="new_password" class="form-control" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control" required>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="confirm_password">Confirm New Password</label>
-                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                    </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">Change Password</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-primary btn-block">Change Password</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

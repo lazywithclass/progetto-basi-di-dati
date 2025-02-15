@@ -199,11 +199,13 @@ INSERT INTO branch (id_library, city, address) VALUES (5, 'Lothlórien', '444 Go
 
 -- creation of all physical copies
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 1),
 (2, 1),(2, 1),
 (3, 1),(3, 1),(3, 1),
 (4, 1),(4, 1),(4, 1),(4, 1);
 
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 2),
 (2, 2),(2, 2),
 (3, 2),(3, 2),(3, 2),
 (4, 2),(4, 2),(4, 2),(4, 2);
@@ -221,21 +223,25 @@ INSERT INTO physical_copy (id_book, id_branch) VALUES
 (4, 4),(4, 4),(4, 4),(4, 4);
 
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 5),
 (2, 5),(2, 5),
 (3, 5),(3, 5),(3, 5),
 (4, 5),(4, 5),(4, 5),(4, 5);
 
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 6),
 (2, 6),(2, 6),
 (3, 6),(3, 6),(3, 6),
 (4, 6),(4, 6),(4, 6),(4, 6);
 
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 7),
 (2, 7),(2, 7),
 (3, 7),(3, 7),(3, 7),
 (4, 7),(4, 7),(4, 7),(4, 7);
 
 INSERT INTO physical_copy (id_book, id_branch) VALUES
+(1, 8),
 (2, 8),(2, 8),
 (3, 8),(3, 8),(3, 8),
 (4, 8),(4, 8),(4, 8),(4, 8);
@@ -254,15 +260,15 @@ INSERT INTO physical_copy (id_book, id_branch) VALUES
 
 -- pippin and gimli have late returns
 INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES
-                                                                        (5, 2, 1), (5, 5, 0);
+(5, 2, 1), (5, 5, 0);
 INSERT INTO library_reader (id_reader, id_library, overdue_returns) VALUES
-                                                                        (6, 2, 2), (6, 5, 0);
+(6, 2, 0), (6, 5, 1);
 -- pippin's loans
 INSERT INTO loan (id_reader, id_physical_copy, start_date, end_date, length, is_returned) VALUES
-    (5, 27, '2010-01-01', '2011-01-01', 14, TRUE);
+(5, 27, '2010-01-01', '2011-01-01', 14, TRUE);
 -- gimli's loans
 INSERT INTO loan (id_reader, id_physical_copy, start_date, end_date, length, is_returned) VALUES
-    (6, 30, '2020-03-01', NULL, 14, FALSE);
+(6, 75, '2020-03-01', NULL, 14, FALSE);
 
 -- Views
 

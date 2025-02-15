@@ -89,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$result) {
             $error = pg_last_error($db);
+        } else {
+            $success = "Book loan requested successfully";
         }
     }
 }
@@ -103,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <?php include 'navbar.php'; ?>
+    <?php include '../handle-result.php'; ?>
 
     <div class="container mt-4">
         <h1>Loan Books</h1>
@@ -114,11 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit" name="search" class="btn btn-primary">Search</button>
         </form>
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
 
         <h2>Search Results</h2>
         <p>Results only include books for which there's an availability</p>
