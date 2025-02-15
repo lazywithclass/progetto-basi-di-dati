@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
     <?php include 'navbar.php'; ?>
     <div class="container mt-4">
         <div id="content">
-            <h1>Welcome, <?php echo $username; ?>!</h1>
+            <h1>Welcome, <?= $username; ?>!</h1>
             <p>Select an option from the menu above to proceed.</p>
         </div>
     </div>

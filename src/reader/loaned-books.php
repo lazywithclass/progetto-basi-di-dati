@@ -56,12 +56,12 @@ if ($result) {
                 <tbody>
                     <?php foreach ($loans as $loan): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($loan['title']); ?></td>
-                        <td><?php echo htmlspecialchars($loan['isbn']); ?></td>
-                        <td><?php echo htmlspecialchars($loan['city']); ?></td>
-                        <td><?php echo htmlspecialchars($loan['address']); ?></td>
-                        <td><?php echo htmlspecialchars($loan['start_date']); ?></td>
-                        <td><?php echo htmlspecialchars($loan['length']); ?></td>
+                        <td><?= htmlspecialchars($loan['title']); ?></td>
+                        <td><?= htmlspecialchars($loan['isbn']); ?></td>
+                        <td><?= htmlspecialchars($loan['city']); ?></td>
+                        <td><?= htmlspecialchars($loan['address']); ?></td>
+                        <td><?= htmlspecialchars($loan['start_date']); ?></td>
+                        <td><?= htmlspecialchars($loan['length']); ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

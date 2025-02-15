@@ -24,7 +24,6 @@ if ($username == "conan") {
     <?php include '../header-libraries.php'; ?>
 </head>
 <body>
-
     <?php include 'navbar.php'; ?>
 
     <div class="container mt-4">
@@ -36,9 +35,5 @@ if ($username == "conan") {
             <p>Select an option from the menu above to proceed.</p>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="./js/index.js"></script>
 </body>
 </html>

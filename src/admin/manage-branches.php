@@ -27,9 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $result = pg_prepare($db, 'insert_branch', $query);
     $result = pg_execute($db, 'insert_branch', array($id_library, $city, $address));
 
-    // TODO handle error
-    header('Location: manage-branches.php');
-    exit;
+    $error = pg_last_error($db);
+    if (empty($error)) {
+        $success = "Branch created successfully";
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
@@ -42,9 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $result = pg_prepare($db, 'update_branch', $query);
     $result = pg_execute($db, 'update_branch', array($id, $id_library, $city, $address));
 
-    // TODO handle error
-    header('Location: manage-branches.php');
-    exit;
+    $error = pg_last_error($db);
+    if (empty($error)) {
+        $success = "Branch updated successfully";
+    }
 }
 
 if (isset($_GET['delete'])) {
@@ -54,9 +56,10 @@ if (isset($_GET['delete'])) {
     $result = pg_prepare($db, 'delete_branch', $query);
     $result = pg_execute($db, 'delete_branch', array($id));
 
-    // TODO handle error
-    header('Location: manage-branches.php');
-    exit;
+    $error = pg_last_error($db);
+    if (empty($error)) {
+        $success = "Branch deleted successfully";
+    }
 }
 
 $editBranch = null;
@@ -99,6 +102,7 @@ if (!empty($search)) {
 <body>
 
     <?php include 'navbar.php'; ?>
+    <?php include '../handle-result.php'; ?>
 
     <div class="container mt-4">
         <h1>Manage Branches</h1>
@@ -108,23 +112,23 @@ if (!empty($search)) {
                 <label>Library:</label>
                 <select name="id_library" class="form-control" required>
                     <?php foreach ($libraries as $library): ?>
-                        <option value="<?php echo htmlspecialchars($library['id']); ?>"
-                            <?php echo (isset($editBranch) && $editBranch['id_library'] == $library['id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($library['name']); ?>
+                        <option value="<?= $library['id'] ?>"
+                            <?= (isset($editBranch) && $editBranch['id_library'] == $library['id']) ? 'selected' : ''; ?>>
+                            <?= htmlspecialchars($library['name']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group">
                 <label>City:</label>
-                <input type="text" name="city" class="form-control" value="<?php echo htmlspecialchars($editBranch['city'] ?? ''); ?>" required>
+                <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($editBranch['city'] ?? ''); ?>" required>
             </div>
             <div class="form-group">
                 <label>Address:</label>
-                <input type="text" name="address" class="form-control" value="<?php echo htmlspecialchars($editBranch['address'] ?? ''); ?>" required>
+                <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($editBranch['address'] ?? ''); ?>" required>
             </div>
             <?php if (isset($editBranch)): ?>
-                <input type="hidden" name="id" value="<?php echo htmlspecialchars($editBranch['id']); ?>">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($editBranch['id']); ?>">
                 <button type="submit" name="update" class="btn btn-secondary">Update Branch</button>
             <?php else: ?>
                 <button type="submit" name="create" class="btn btn-success">Add Branch</button>
@@ -133,7 +137,7 @@ if (!empty($search)) {
 
         <form method="GET" class="mb-3">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by city, address, or library" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                <input type="text" name="search" class="form-control" placeholder="Search by city, address, or library" value="<?= htmlspecialchars($_GET['search'] ?? ''); ?>">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
@@ -157,16 +161,16 @@ if (!empty($search)) {
             <tbody>
                 <?php foreach ($branches as $branch): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($branch['library_name']); ?></td>
-                    <td><?php echo htmlspecialchars($branch['city']); ?></td>
-                    <td><?php echo htmlspecialchars($branch['address']); ?></td>
-                    <td><?php echo htmlspecialchars($branch['total_copies']); ?></td>
-                    <td><?php echo htmlspecialchars($branch['total_distinct_isbn']); ?></td>
-                    <td><?php echo htmlspecialchars($branch['active_loans']); ?></td>
+                    <td><?= htmlspecialchars($branch['library_name']); ?></td>
+                    <td><?= htmlspecialchars($branch['city']); ?></td>
+                    <td><?= htmlspecialchars($branch['address']); ?></td>
+                    <td><?= htmlspecialchars($branch['total_copies']); ?></td>
+                    <td><?= htmlspecialchars($branch['total_distinct_isbn']); ?></td>
+                    <td><?= htmlspecialchars($branch['active_loans']); ?></td>
                     <td class="text-nowrap">
-                        <a href="manage-branches-late-returns-report.php?id_branch=<?php echo $branch['id']; ?>" class="btn btn-info btn-sm">Late returns report</a>
-                        <a href="?edit=<?php echo $branch['id']; ?>" class="btn btn-info btn-sm">Edit</a>
-                        <a href="?delete=<?php echo $branch['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this branch?')">Delete</a>
+                        <a href="manage-branches-late-returns-report.php?id_branch=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Late returns report</a>
+                        <a href="?edit=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Edit</a>
+                        <a href="?delete=<?= $branch['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this branch?')">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -178,7 +182,5 @@ if (!empty($search)) {
             </tbody>
         </table>
     </div>
-
-    <script src="./js/index.js"></script>
 </body>
 </html>

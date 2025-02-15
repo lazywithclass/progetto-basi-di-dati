@@ -38,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'return_loan_query', array($loanId));
 
         if ($result) {
+            $success = "Loan successfully returned";
             header('Location: manage-loans.php');
-            exit;
         } else {
             $error = pg_last_error($db);
         }
@@ -51,8 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'extend_loan_query', array($loanId));
 
         if ($result) {
-            header('Location: manage-loans.php');
-            exit;
+            $success = "Loan successfully extended";
         } else {
             $error = pg_last_error($db);
         }
@@ -69,16 +68,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
     <?php include 'navbar.php'; ?>
+    <?php include '../handle-result.php'; ?>
 
     <div class="container mt-4">
         <h1>Manage Loans</h1>
-
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
-
         <p>Listed here are loans that are not yet returned to your libraries</p>
         <table class="table table-striped">
             <thead>
@@ -103,12 +96,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td class="<?= ($days_diff[0] == "-") ? "text-danger" : "" ?>"><?= $days_diff ?></td>
                     <td class="text-nowrap">
                         <form method="POST" style="display:inline-block;">
-                            <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                            <input type="hidden" name="loan_id" value="<?= $loan['id']; ?>">
                             <button type="submit" name="return" class="btn btn-success btn-sm">Mark as Returned</button>
                         </form>
                         <form method="POST" style="display:inline-block;">
-                            <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
-                            <button type="submit" name="extend" class="btn btn-warning btn-sm" <?php echo $loan['extension_count'] >= 3 ? 'disabled' : ''; ?>>Extend Loan</button>
+                            <input type="hidden" name="loan_id" value="<?= $loan['id']; ?>">
+                            <button type="submit" name="extend" class="btn btn-warning btn-sm" <?= $loan['extension_count'] >= 3 ? 'disabled' : ''; ?>>Extend Loan</button>
                         </form>
                     </td>
                 </tr>
@@ -121,7 +114,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tbody>
         </table>
     </div>
-
-    <script src="./js/index.js"></script>
 </body>
 </html>

@@ -133,21 +133,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <tbody>
                 <?php foreach ($books as $book): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($book['title']); ?></td>
-                    <td><?php echo htmlspecialchars($book['isbn']); ?></td>
-                    <td><?php echo htmlspecialchars($book['author']); ?></td>
+                    <td><?= htmlspecialchars($book['title']); ?></td>
+                    <td><?= htmlspecialchars($book['isbn']); ?></td>
+                    <td><?= htmlspecialchars($book['author']); ?></td>
                     <td>
                         <select name="id_branch" class="form-control">
                             <?php foreach ($book['branches'] as $branch): ?>
-                                <option value="<?php echo htmlspecialchars($branch['id']); ?>">
-                                    <?php echo htmlspecialchars($branch['city'] . ' - ' . $branch['address']); ?>
+                                <option value="<?= htmlspecialchars($branch['id']); ?>">
+                                    <?= htmlspecialchars($branch['city'] . ' - ' . $branch['address']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </td>
                     <td>
                         <form action="loan-books.php" method="POST">
-                            <input type="hidden" name="id_physical_copy" value="<?php echo htmlspecialchars($book['id_physical_copy']); ?>">
+                            <input type="hidden" name="id_physical_copy" value="<?= htmlspecialchars($book['id_physical_copy']); ?>">
                             <button type="submit" name="loan" class="btn btn-success">Loan request</button>
                         </form>
                     </td>

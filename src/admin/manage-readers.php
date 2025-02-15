@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    echo($password);
 
     if (isset($_POST['create'])) {
         $query = "INSERT INTO reader (username, password_hash, fiscal_code, name, surname) VALUES ($1, $2, $3, $4, $5)";
@@ -25,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'insert_reader_query', array($username, $password, $fiscal_code, $name, $surname));
 
         if ($result) {
-            header('Location: manage-readers.php');
-            exit;
+            $success = "User created successfully";
         } else {
             $error = pg_last_error($db);
         }
@@ -37,8 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = pg_execute($db, 'update_reader_query', array($username, $fiscal_code, $name, $surname, $password, $id));
 
         if ($result) {
-            header('Location: manage-readers.php');
-            exit;
+            $success = "User updated successfully";
         } else {
             $error = pg_last_error($db);
 
@@ -53,8 +50,7 @@ if (isset($_GET['delete'])) {
     $result = pg_execute($db, 'delete_reader_query', array($id));
 
     if ($result) {
-        header('Location: manage-readers.php');
-        exit;
+        $success = "User deleted successfully";
     } else {
         $error = pg_last_error($db);
     }
@@ -83,8 +79,7 @@ if (isset($_GET['reset-overdue'])) {
     $result = pg_execute($db, 'update_reader_query', array($id, $id_library));
 
     if ($result) {
-        header('Location: manage-readers.php');
-        exit;
+        $success = "Successfully reset overdue";
     } else {
         $error = pg_last_error($db);
     }
@@ -100,13 +95,14 @@ if (isset($_GET['reset-overdue'])) {
 <body>
 
     <?php include 'navbar.php'; ?>
+    <?php include '../handle-result.php'; ?>
 
     <div class="container mt-4">
         <h1>Manage Readers</h1>
         <form method="POST" class="mb-4">
             <div class="form-group">
                 <label>Username:</label>
-                <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($editReader['username'] ?? ''); ?>" required>
+                <input type="text" name="username" class="form-control" value="<?= htmlspecialchars($editReader['username'] ?? ''); ?>" required>
             </div>
             <div class="form-group">
                 <label>Password:</label>
@@ -114,15 +110,15 @@ if (isset($_GET['reset-overdue'])) {
             </div>
             <div class="form-group">
                 <label>Fiscal Code:</label>
-                <input type="text" name="fiscal_code" class="form-control" value="<?php echo htmlspecialchars($editReader['fiscal_code'] ?? ''); ?>" required>
+                <input type="text" name="fiscal_code" class="form-control" value="<?= htmlspecialchars($editReader['fiscal_code'] ?? ''); ?>" required>
             </div>
             <div class="form-group">
                 <label>Name:</label>
-                <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($editReader['name'] ?? ''); ?>" required>
+                <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($editReader['name'] ?? ''); ?>" required>
             </div>
             <div class="form-group">
                 <label>Surname:</label>
-                <input type="text" name="surname" class="form-control" value="<?php echo htmlspecialchars($editReader['surname'] ?? ''); ?>" required>
+                <input type="text" name="surname" class="form-control" value="<?= htmlspecialchars($editReader['surname'] ?? ''); ?>" required>
             </div>
             <?php if (isset($editReader)): ?>
                 <button type="submit" name="update" class="btn btn-secondary">Update Reader</button>
@@ -130,15 +126,10 @@ if (isset($_GET['reset-overdue'])) {
                 <button type="submit" name="create" class="btn btn-success">Add Reader</button>
             <?php endif; ?>
         </form>
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
 
         <form method="GET" class="mb-3">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by username, name, or surname" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                <input type="text" name="search" class="form-control" placeholder="Search by username, name, or surname" value="<?= htmlspecialchars($_GET['search'] ?? ''); ?>">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
@@ -162,16 +153,16 @@ if (isset($_GET['reset-overdue'])) {
             <tbody>
                 <?php foreach ($readers as $reader): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($reader['username']); ?></td>
-                    <td><?php echo htmlspecialchars($reader['library_name']); ?></td>
-                    <td><?php echo htmlspecialchars($reader['overdue_returns']); ?></td>
-                    <td><?php echo htmlspecialchars($reader['fiscal_code']); ?></td>
-                    <td><?php echo htmlspecialchars($reader['name']); ?></td>
-                    <td><?php echo htmlspecialchars($reader['surname']); ?></td>
+                    <td><?= htmlspecialchars($reader['username']); ?></td>
+                    <td><?= htmlspecialchars($reader['library_name']); ?></td>
+                    <td><?= htmlspecialchars($reader['overdue_returns']); ?></td>
+                    <td><?= htmlspecialchars($reader['fiscal_code']); ?></td>
+                    <td><?= htmlspecialchars($reader['name']); ?></td>
+                    <td><?= htmlspecialchars($reader['surname']); ?></td>
                     <td class="text-nowrap">
-                        <a href="?reset-overdue=<?php echo $reader['id']; ?>&library-id=<?php echo $reader['library_id']; ?>" class="btn btn-info btn-sm" onclick="return confirm('Are you sure you want to reset this reader\'s overdue count?')">Reset overdue</a>
-                        <a href="?edit=<?php echo $reader['id']; ?>" class="btn btn-info btn-sm">Edit</a>
-                        <a href="?delete=<?php echo $reader['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this reader?')">Delete</a>
+                        <a href="?reset-overdue=<?= $reader['id']; ?>&library-id=<?= $reader['library_id']; ?>" class="btn btn-info btn-sm" onclick="return confirm('Are you sure you want to reset this reader\'s overdue count?')">Reset overdue</a>
+                        <a href="?edit=<?= $reader['id']; ?>" class="btn btn-info btn-sm">Edit</a>
+                        <a href="?delete=<?= $reader['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this reader?')">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -183,8 +174,6 @@ if (isset($_GET['reset-overdue'])) {
             </tbody>
         </table>
     </div>
-
-    <script src="./js/index.js"></script>
 </body>
 </html>
 

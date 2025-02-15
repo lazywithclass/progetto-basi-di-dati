@@ -1,8 +1,6 @@
 <?php
 require_once '../config.php';
 
-// TODO consider using TRANSACTIONS
-
 function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors) {
     $db = get_connection();
     $query = "UPDATE book SET isbn = $1, title = $2, publisher = $3, plot = $4 WHERE id = $5";
@@ -10,7 +8,7 @@ function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publish
     $result = pg_execute($db, 'update_book_query', array($isbn, $title, $publisher, $plot, $id_book));
 
     if (!$result) {
-        return [pg_last_error($db)];
+        return pg_last_error($db);
     }
 
     $query = "DELETE FROM author_book WHERE id_book = $1";
@@ -18,7 +16,7 @@ function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publish
     $result = pg_execute($db, 'delete_author_book_query', array($id_book));
 
     if (!$result) {
-        return [pg_last_error($db)];
+        return pg_last_error($db);
     }
 
     foreach ($selected_authors as $id_author) {
@@ -26,11 +24,9 @@ function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publish
         $result = pg_prepare($db, 'insert_author_book_query', $query);
         $result = pg_execute($db, 'insert_author_book_query', array($id_author, $id_book));
         if (!$result) {
-            return [pg_last_error($db)];
+            return pg_last_error($db);
         }
     }
-
-    return [];
 }
 
 function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors) {
@@ -40,7 +36,7 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
     $result = pg_execute($db, 'insert_book_query', array($isbn, $title, $publisher, $plot));
 
     if (!$result) {
-        return [pg_last_error($db)];
+        return pg_last_error($db);
     }
 
     if ($result && pg_num_rows($result) > 0) {
@@ -53,7 +49,7 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
         $result = pg_prepare($db, 'insert_author_book_query', $query);
         $result = pg_execute($db, 'insert_author_book_query', array($id_author, $id_book));
         if (!$result) {
-            return [pg_last_error($db)];
+            return pg_last_error($db);
         }
     }
 
@@ -61,7 +57,7 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
     $result = pg_prepare($db, 'insert_physical_copy_query', $query);
     $result = pg_execute($db, 'insert_physical_copy_query', array($id_book, $id_branch));
 
-    return [pg_last_error($db)];
+    return pg_last_error($db);
 }
 
 function find_books_for_librarian($librarianId, $search_term) {
@@ -75,8 +71,6 @@ function find_books_for_librarian($librarianId, $search_term) {
     $query = "SELECT * FROM librarian_books WHERE id_librarian = $1 AND (title ILIKE $2 OR isbn ILIKE $2)";
     $result = pg_prepare($db, 'select_books_for_librarian', $query);
     $result = pg_execute($db, 'select_books_for_librarian', $params);
-
-    echo pg_last_error($db);
 
     $books = [];
     while ($row = pg_fetch_assoc($result)) {

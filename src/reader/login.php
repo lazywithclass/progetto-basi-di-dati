@@ -34,15 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php include '../header-libraries.php'; ?>
 </head>
 <body>
+    <?php include '../handle-result.php'; ?>
     <div class="container">
         <h2 class="my-4 text-center">Quibreria - Reader login</h2>
         <p><a href="/admin/">Switch</a> to admin login.</p>
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger" role="alert">
-                <?php echo $error; ?>
-            </div>
-        <?php endif; ?>
-        <form action="login.php" method="post" class="needs-validation" novalidate>
+        <form action="login.php" method="post">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" name="username" id="username" class="form-control" required>
@@ -56,26 +52,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit" class="btn btn-primary btn-block">Login</button>
         </form>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script>
-        (function() {
-            window.addEventListener('load', function() {
-                const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
 </body>
 </html>

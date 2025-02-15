@@ -3,8 +3,6 @@ session_start();
 require_once '../config.php';
 require_once 'check-logged.php';
 
-ini_set('log_errors', 1);
-ini_set('error_log', 'app-errors.log');
 $error = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,32 +11,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if (isset($_POST['reader_id'])) {
-        if ($new_password !== $confirm_password) {
-            $error = 'New passwords do not match.';
-        } else {
-            $db = get_connection();
+    if ($new_password !== $confirm_password) {
+        $error = 'New passwords do not match.';
+    } else {
+        $db = get_connection();
 
-            $query = "SELECT password_hash FROM reader WHERE id = $1";
-            $stmt = pg_prepare($db, 'select_reader_password', $query);
-            $result = pg_execute($db, 'select_reader_password', array($reader_id));
+        $query = "SELECT password_hash FROM reader WHERE id = $1";
+        $stmt = pg_prepare($db, 'select_reader_password', $query);
+        $result = pg_execute($db, 'select_reader_password', array($reader_id));
+        if (!$result) {
+            $error = pg_last_error($db);
+        }
+
+        $row = pg_fetch_assoc($result);
+        if (!password_verify($old_password, $row['password_hash'])) {
+            $error = "Old password is incorrect.";
+        } else {
+            $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+            $update_query = "UPDATE reader SET password_hash = $1 WHERE id = $2";
+            $stmt = pg_prepare($db, 'update_reader_password', $update_query);
+            $result = pg_execute($db, 'update_reader_password', array($hashed_password, $reader_id));
             if (!$result) {
                 $error = pg_last_error($db);
-            }
-
-            $row = pg_fetch_assoc($result);
-            if (!password_verify($old_password, $row['password_hash'])) {
-                $error = "Old password is incorrect.";
             } else {
-                $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
-                $update_query = "UPDATE reader SET password_hash = $1 WHERE id = $2";
-                $stmt = pg_prepare($db, 'update_reader_password', $update_query);
-                $result = pg_execute($db, 'update_reader_password', array($hashed_password, $reader_id));
-                if (!$result) {
-                    $error = pg_last_error($db);
-                } else {
-                    $success = "Password changed";
-                }
+                $success = "Password changed";
             }
         }
     }
@@ -61,8 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1>Change Password</h1>
                 <div class="card-body">
                     <form method="post" action="change_password.php">
-                        <input type="hidden" name="reader_id" value="<?= $_SESSION['id'] ?>">
-
                         <div class="form-group">
                             <label for="old_password">Old Password</label>
                             <input type="password" id="old_password" name="old_password" class="form-control" required>
