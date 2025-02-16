@@ -284,11 +284,11 @@ JOIN physical_copy pc ON pc.id_book = b.id
 JOIN librarian_branches lb ON pc.id_branch = lb.id_branch;
 
 CREATE MATERIALIZED VIEW branch_stats AS
-SELECT b.id, b.city, b.address, l.name AS library_name, COUNT(pc.*) as total_copies, COUNT(distinct bo.isbn) as total_distinct_isbn, COUNT(lo.id) as active_loans
+SELECT b.id, b.city, b.address, l.name, COUNT(pc.*) as total_copies, COUNT(distinct bo.isbn) as total_distinct_isbn, COUNT(lo.id) as active_loans
 FROM branch b
-JOIN physical_copy pc ON pc.id_branch = b.id
-JOIN book bo ON bo.id = pc.id_book
 JOIN library l ON b.id_library = l.id
+LEFT JOIN physical_copy pc ON pc.id_branch = b.id
+LEFT JOIN book bo ON bo.id = pc.id_book
 LEFT JOIN loan lo ON lo.id_physical_copy = pc.id
 GROUP BY b.id, l.name, lo.id;
 

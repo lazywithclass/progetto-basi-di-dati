@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SELECT 
                 pc.id as id_physical_copy,
                 b.*, 
+                li.name as library_name,
                 br.id as id_branch,
                 br.city as branch_city,
                 br.address as branch_address,
@@ -37,12 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             JOIN author a ON a.id = ab.id_author
             JOIN physical_copy pc ON pc.id_book = b.id
             JOIN branch br ON br.id = pc.id_branch
+            JOIN library li ON li.id = br.id_library
             LEFT JOIN loan l ON l.id_physical_copy = pc.id AND l.is_returned = FALSE
             WHERE 
                 br.id_library = ANY($1) 
                 AND (b.title ILIKE $2 OR b.isbn ILIKE $2)
                 AND (l.id IS NULL OR l.is_returned = TRUE)  -- exclude copies that have an active loan
-            GROUP BY b.id, a.id, br.id, pc.id;";
+            GROUP BY b.id, a.id, br.id, pc.id, li.id;";
 
         $result = pg_prepare($db, 'search_books_query', $query);
         $result = pg_execute($db, 'search_books_query', array('{' . implode(',', $userLibraries) . '}', '%' . $searchTerm . '%'));
@@ -67,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'title' => $book['title'],
                     'isbn' => $book['isbn'],
                     'author' => $book['author'],
+                    'library_name' => $book['library_name'],
                     'branches' => []
                 ];
             }
@@ -123,9 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>ISBN</th>
+                    <th>Title (ISBN)</th>
                     <th>Author</th>
+                    <th>Library</th>
                     <th>Branch</th>
                     <th>Action</th>
                 </tr>
@@ -133,9 +136,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <tbody>
                 <?php foreach ($books as $book): ?>
                 <tr>
-                    <td><?= htmlspecialchars($book['title']); ?></td>
-                    <td><?= htmlspecialchars($book['isbn']); ?></td>
+                    <td>
+                        <?= htmlspecialchars($book['title']); ?><br />
+                        (<?= htmlspecialchars($book['isbn']); ?>)
+                    </td>
                     <td><?= htmlspecialchars($book['author']); ?></td>
+                    <td><?= htmlspecialchars($book['library_name']); ?></td>
                     <td>
                         <select name="id_branch" class="form-control">
                             <?php foreach ($book['branches'] as $branch): ?>

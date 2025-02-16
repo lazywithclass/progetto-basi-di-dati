@@ -76,18 +76,37 @@ if (isset($_GET['edit'])) {
 
 $search = $_GET['search'] ?? '';
 if (!empty($search)) {
-    $result = pg_prepare($db, 'refresh_branch_stats', "REFRESH MATERIALIZED VIEW branch_stats;");
-    $result = pg_execute($db, 'refresh_branch_stats', []);
-
     $params = [];
     $params[] = "%$search%";
-    $query = "SELECT * FROM branch_stats WHERE city ILIKE $1 OR address ILIKE $1 OR library_name ILIKE $1;";
+    $query = "
+        SELECT b.id, b.city, b.address, l.name
+        FROM branch b
+        JOIN library l ON b.id_library = l.id
+        WHERE city ILIKE $1 OR address ILIKE $1 OR name ILIKE $1;";
     $result = pg_prepare($db, 'select_branches', $query);
     $result = pg_execute($db, 'select_branches', $params);
     $branches = [];
     if ($result) {
         while ($row = pg_fetch_assoc($result)) {
             $branches[] = $row;
+        }
+    }
+}
+
+$search_with_stats = $_GET['search-with-stats'] ?? '';
+if (!empty($search_with_stats)) {
+    $result = pg_prepare($db, 'refresh_branch_stats', "REFRESH MATERIALIZED VIEW branch_stats;");
+    $result = pg_execute($db, 'refresh_branch_stats', []);
+
+    $params = [];
+    $params[] = $search_with_stats;
+    $query = "SELECT * FROM branch_stats WHERE id = $1;";
+    $result = pg_prepare($db, 'select_branches_with_stats', $query);
+    $result = pg_execute($db, 'select_branches_with_stats', $params);
+    $branches_with_stats = [];
+    if ($result) {
+        while ($row = pg_fetch_assoc($result)) {
+            $branches_with_stats[] = $row;
         }
     }
 }
@@ -144,10 +163,11 @@ if (!empty($search)) {
             </div>
         </form>
 
-        <h2>Branches List</h2>
-        <p>Listed here are branches that belong to your libraries</p>
-        <table class="table table-striped">
-            <thead>
+        <?php if (!empty($_GET['search-with-stats'])) { ?>
+            <h2>Branches List With Stats</h2>
+            <p>Listed here are branches stats that belong to your libraries</p>
+            <table class="table table-striped">
+                <thead>
                 <tr>
                     <th>Library</th>
                     <th>City</th>
@@ -155,32 +175,62 @@ if (!empty($search)) {
                     <th>Total copies</th>
                     <th>Total distinct ISBNs</th>
                     <th>Active loans</th>
-                    <th>Action</th>
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($branches as $branch): ?>
-                <tr>
-                    <td><?= htmlspecialchars($branch['library_name']); ?></td>
-                    <td><?= htmlspecialchars($branch['city']); ?></td>
-                    <td><?= htmlspecialchars($branch['address']); ?></td>
-                    <td><?= htmlspecialchars($branch['total_copies']); ?></td>
-                    <td><?= htmlspecialchars($branch['total_distinct_isbn']); ?></td>
-                    <td><?= htmlspecialchars($branch['active_loans']); ?></td>
-                    <td class="text-nowrap">
-                        <a href="manage-branches-late-returns-report.php?id_branch=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Late returns report</a>
-                        <a href="?edit=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Edit</a>
-                        <a href="?delete=<?= $branch['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this branch?')">Delete</a>
-                    </td>
-                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($branches_with_stats as $branch): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($branch['name']); ?></td>
+                        <td><?= htmlspecialchars($branch['city']); ?></td>
+                        <td><?= htmlspecialchars($branch['address']); ?></td>
+                        <td><?= htmlspecialchars($branch['total_copies']); ?></td>
+                        <td><?= htmlspecialchars($branch['total_distinct_isbn']); ?></td>
+                        <td><?= htmlspecialchars($branch['active_loans']); ?></td>
+                    </tr>
                 <?php endforeach; ?>
                 <?php
-                if (empty($branches)) {
-                    echo "<tr><td colspan='7' class='text-center'>No branches found</td></tr>";
+                if (empty($branches_with_stats)) {
+                    echo "<tr><td colspan='6' class='text-center'>No branches found</td></tr>";
                 }
                 ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        <?php } ?>
+
+        <?php if (empty($_GET['search-with-stats'])) { ?>
+            <h2>Branches List</h2>
+            <p>Listed here are branches that belong to your libraries</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Library</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($branches as $branch): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($branch['name']); ?></td>
+                        <td><?= htmlspecialchars($branch['city']); ?></td>
+                        <td><?= htmlspecialchars($branch['address']); ?></td>
+                        <td class="text-nowrap">
+                            <a href="?search-with-stats=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Statistics</a>
+                            <a href="manage-branches-late-returns-report.php?id_branch=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Late returns report</a>
+                            <a href="?edit=<?= $branch['id']; ?>" class="btn btn-info btn-sm">Edit</a>
+                            <a href="?delete=<?= $branch['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this branch?')">Delete</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php
+                    if (empty($branches)) {
+                        echo "<tr><td colspan='4' class='text-center'>No branches found</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        <?php } ?>
     </div>
 </body>
 </html>
