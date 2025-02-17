@@ -8,28 +8,34 @@
 Si assume che il progetto venga eseguito su una distribuzione Linux, e' stato testato su NixOS 24.11; il file default.nix
 serve in questo sistema operativo per evitare installazioni globali.
 
+\newpage
+
 ## Schema concettuale (ER)
 
-![er](images/er.png)
+![schema er](images/er.png)
+
+\newpage
 
 ## Schema logico (relazionale)
 
+Ho rappresentato le chiavi primarie tra asterischi.
+
 ```
-author(<ins>id</ins>, name, surname, bio, 
-    birth_date, death_date*)
-book(<ins>id</ins>, isbn, title, publisher, plot)
-author_book(<ins>id_author, id_book</ins>)
-physical_copy(<ins>id</ins>, id_book, id_branch)
-loan(<ins>id</ins>, id_reader, id_physical_copy, 
-    start_date, end_date*, length, is_returned)
-reader(<ins>id</ins>, fiscal_code, username, 
+author(**id**, name, surname, bio, 
+    birth_date, death_date**)
+book(**id**, isbn, title, publisher, plot)
+author_book(**id_author, id_book**)
+physical_copy(**id**, id_book, id_branch)
+loan(**id**, id_reader, id_physical_copy, 
+    start_date, end_date**, length, is_returned)
+reader(**id**, fiscal_code, username, 
     password, name, surname)
-librarian(<ins>id</ins>, username, password, email)
-library(<ins>id</ins>, name)
-library_reader(<ins>id_library, id_reader</ins>, 
+librarian(**id**, username, password, email)
+library(**id**, name)
+library_reader(**id_library, id_reader**, 
     overdue_returns, category)
-library_librarian(<ins>id_library, id_librarian</ins>)
-branch(<ins>id</ins>, id_library, city, address)
+library_librarian(**id_library, id_librarian**)
+branch(**id**, id_library, city, address)
 ```
 
 
@@ -63,6 +69,8 @@ Per fermare il servizio di PostgreSQL
 ```shell
 $ ./scripts/postgresql-stop.sh
 ```
+
+\newpage
 
 ## Funzionalita' realizzate con strutture interne della base di dati
 
@@ -144,6 +152,8 @@ e i lettori che li hanno in carico.
 lettori con prestiti in ritardo, collegandoli alla sede della biblioteca a cui 
 appartengono. Questo consente di generare report dettagliati sui ritardi per ogni sede.
 
+\newpage
+
 ## Struttura del progetto
 
 Segue una spiegazione di come e' strutturato il progetto
@@ -176,6 +186,8 @@ Contiene gli script utili a far partire il progetto.
 Suddivisa in admin/ e reader/ in base al tipo di utente che ha effettuato il login.
 Eventuali file condivisi sono dentro src/ stessa.
 
+\newpage
+
 ## Screenshot di funzionamento
 
 ### Lettore
@@ -201,6 +213,8 @@ Eventuali file condivisi sono dentro src/ stessa.
 ![Change password fallita perche' le password non corrispondono](images/reader-change-password-no-match.png)
 
 ![Change password successo](images/reader-change-password-successfull.png)
+
+\newpage
 
 ### Bibliotecario
 

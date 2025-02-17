@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS library_librarian CASCADE;
 
 
 DROP MATERIALIZED VIEW IF EXISTS librarian_books;
+DROP MATERIALIZED VIEW IF EXISTS branch_stats;
 
 -- creation
 

@@ -178,7 +178,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                     <th>Title</th>
                     <th>Publisher</th>
                     <th>Plot</th>
-                    <th>Branch</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -189,7 +188,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                     <td><?= htmlspecialchars($book['title']); ?></td>
                     <td><?= htmlspecialchars($book['publisher']); ?></td>
                     <td><?= htmlspecialchars($book['plot']); ?></td>
-                    <td><?= htmlspecialchars($book['branch_name']); ?></td>
                     <td class="text-nowrap">
                         <a href="?edit=<?= $book['id']; ?>" class="btn btn-info btn-sm">Edit</a>
                         <a href="?delete=<?= $book['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>

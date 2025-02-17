@@ -1,5 +1,12 @@
 # Manuale
 
+## URL
+
+Una volta eseguito il servizio PHP l'applicazione risponde sulla porta 1102, a questo punto si puo' navigare a:
+
+* http://localhost:1102/admin - per iniziare una sessione da bibliotecario
+* http://localhost:1102/reader - per iniziare una sessione da lettore
+
 ## Credenziali
 
 Le credenziali sono sempre una coppia username password dove la password e' uguale all'username.
