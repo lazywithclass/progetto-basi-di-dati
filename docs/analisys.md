@@ -1,9 +1,12 @@
 # progetto-basi-di-dati
 
+Questi sono degli appunti che ho preso in fase di analisi del lavoro da fare.
+Ho pensato di tenerli comunque
+
 ## Appunti preliminari
 
 1. analisi dei requisiti - prendere dal libro le info e seguire
-2. identificazione delle funzionalita da sviluppare - ez
+2. identificazione delle funzionalita da sviluppare
 3. progettazione e realizzazione della base di dati - progettazione concettuale (ER) e progettazione logica (relazionale), da libro etc
 4. progettazione e realizzazione della struttura e della presentazione delle pagine Web necessarie per interfacciarsi con la base di dati - in base alle funzionalita' creare pagine
 5. preparazione della documentazione e del materiale da consegnare - se ho fatto i punti precedenti questo e' fatto, ricordarsi di fare screenshot delle feature
@@ -15,6 +18,7 @@ biblioteca, dislocata su diverse sedi, con funzionalita sia per i lettori iscrit
 per i bibliotecari che la gestiscono
 
 ### Utente lettore
+
 * visualizzare le informazioni sui cataloghi e sui libri
 * prendere in prestito fintanto che non supera la soglia massima di libri consegnati in ritardo
 * Ogni prestito ha una durata massima di default pari a un mese
@@ -26,6 +30,7 @@ per i bibliotecari che la gestiscono
 * per ogni libro prestato occorre tenere traccia della data in cui viene effettuata la restituzione
 
 ### Utente bibliotecario
+
 * inserisce l'avvenuta riconsegna del libro
 * puo azzerare il numero di volumi restituiti in ritardo dal lettore
 * puo' estendere la durata massima del prestito
@@ -34,15 +39,18 @@ per i bibliotecari che la gestiscono
 * aggiunge o modifica sedi
 
 ### Biblioteca
+
 * su diversi indirizzi
 
 ### Libro
+
 * ogni libro nella libreria ha almeno: ISBN, titolo, autori, trama, e casa editrice (la biblioteca puo possedere diverse copie, identificate da un codice univoco, che possono essere distribuite anche su diverse sedi)
 * per ogni copia di un dato libro sapere quale sede lo gestisce e se e disponibile oppure al momento gia prestato
 * puo avere diversi autori
 * I libri gestiti dalla biblioteca possono essere presi in prestito dai lettori iscritti alla biblioteca
 
 ### Autore
+
 * Degli autori, identificati da un codice univoco, la biblioteca mantiene informazioni quali nome e cognome, data di nascita ed eventualmente di morte, ed una breve biografia
 
 ## Feature obbligatoriamente da implementare usando strutture interne al db

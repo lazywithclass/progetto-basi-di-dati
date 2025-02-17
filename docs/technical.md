@@ -14,17 +14,24 @@ serve in questo sistema operativo per evitare installazioni globali.
 
 ## Schema logico (relazionale)
 
-author(<ins>id</ins>, name, surname, bio, birth_date, death_date*)<br />
-book(<ins>id</ins>, isbn, title, publisher, plot)<br />
-author_book(<ins>id_author, id_book</ins>)<br />
-physical_copy(<ins>id</ins>, id_book, id_branch)<br />
-loan(<ins>id</ins>, id_reader, id_physical_copy, start_date, end_date*, length, is_returned)<br />
-reader(<ins>id</ins>, fiscal_code, username, password, name, surname)<br />
-librarian(<ins>id</ins>, username, password, email)<br />
-library(<ins>id</ins>, name)<br />
-library_reader(<ins>id_library, id_reader</ins>, overdue_returns, category)<br />
-library_librarian(<ins>id_library, id_librarian</ins>)<br />
-branch(<ins>id</ins>, id_library, city, address)<br />
+```
+author(<ins>id</ins>, name, surname, bio, 
+    birth_date, death_date*)
+book(<ins>id</ins>, isbn, title, publisher, plot)
+author_book(<ins>id_author, id_book</ins>)
+physical_copy(<ins>id</ins>, id_book, id_branch)
+loan(<ins>id</ins>, id_reader, id_physical_copy, 
+    start_date, end_date*, length, is_returned)
+reader(<ins>id</ins>, fiscal_code, username, 
+    password, name, surname)
+librarian(<ins>id</ins>, username, password, email)
+library(<ins>id</ins>, name)
+library_reader(<ins>id_library, id_reader</ins>, 
+    overdue_returns, category)
+library_librarian(<ins>id_library, id_librarian</ins>)
+branch(<ins>id</ins>, id_library, city, address)
+```
+
 
 ## Configurazione
 
@@ -173,82 +180,56 @@ Eventuali file condivisi sono dentro src/ stessa.
 
 ### Lettore
 
-![img.png](images/reader-login.png)
-<figcaption style="margin-top: -25px; font-style: italic">Login</figcaption>
+![Login](images/reader-login.png)
 
-![img.png](images/reader-index.png)
-<figcaption style="margin-top: -25px; font-style: italic">Index</figcaption>
+![Index](images/reader-index.png)
 
-![img.png](images/reader-loan-books.png)
-<figcaption style="margin-top: -25px; font-style: italic">Loan books</figcaption>
+![Loan books](images/reader-loan-books.png)
 
-![img.png](images/reader-loan-books-search.png)
-<figcaption style="margin-top: -25px; font-style: italic">Loan books dopo una ricerca per titoilo</figcaption>
+![Loan books dopo una ricerca per titolo](images/reader-loan-books-search.png)
 
-![img.png](images/reader-loaned-book-message.png)
-<figcaption style="margin-top: -25px; font-style: italic">Loaned book messaggio</figcaption>
+![Loaned book messaggio](images/reader-loaned-book-message.png)
 
-![img.png](images/reader-no-loaned-books.png)
-<figcaption style="margin-top: -25px; font-style: italic">Niente prestiti per questo utente</figcaption>
+![Niente prestiti per questo utente](images/reader-no-loaned-books.png)
 
-![img.png](images/reader-with-loaned-books.png)
-<figcaption style="margin-top: -25px; font-style: italic">Lettore con un eccellente gusto in fatto di libri</figcaption>
+![Lettore con un eccellente gusto in fatto di libri](images/reader-with-loaned-books.png)
 
-![img.png](images/reader-change-password.png)
-<figcaption style="margin-top: -25px; font-style: italic">Change password</figcaption>
+![Change password](images/reader-change-password.png)
 
-![img.png](images/reader-change-password-old-incorrect.png)
-<figcaption style="margin-top: -25px; font-style: italic">Change password fallita perche' la vecchia password non e' corretta</figcaption>
+![Change password fallita perche' la vecchia password non e' corretta](images/reader-change-password-old-incorrect.png)
 
-![img.png](images/reader-change-password-no-match.png)
-<figcaption style="margin-top: -25px; font-style: italic">Change password fallita perche' le password non corrispondono</figcaption>
+![Change password fallita perche' le password non corrispondono](images/reader-change-password-no-match.png)
 
-![img.png](images/reader-change-password-successfull.png)
-<figcaption style="margin-top: -25px; font-style: italic">Change password successo</figcaption>
+![Change password successo](images/reader-change-password-successfull.png)
 
 ### Bibliotecario
 
-![img.png](images/librarian-login.png)
-<figcaption style="margin-top: -25px; font-style: italic">Login</figcaption>
+![Login](images/librarian-login.png)
 
-![img.png](images/librarian-index.png)
-<figcaption style="margin-top: -25px; font-style: italic">Index</figcaption>
+![Index](images/librarian-index.png)
 
-![img.png](images/librarian-manage-readers.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage readers</figcaption>
+![Manage readers](images/librarian-manage-readers.png)
 
-![img.png](images/librarian-manage-readers-found.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage readers, trovato un reader attraverso la ricerca</figcaption>
+![Manage readers, trovato un reader attraverso la ricerca](images/librarian-manage-readers-found.png)
 
-![img.png](images/librarian-manage-readers-edit.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage readers, modifica</figcaption>
+![Manage readers, modifica](images/librarian-manage-readers-edit.png)
 
-![img.png](images/librarian-manage-books.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage books</figcaption>
+![Manage books](images/librarian-manage-books.png)
 
-![img.png](images/librarian-manage-books-found.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage books, trovati libri che iniziano per "The"</figcaption>
+![Manage books, trovati libri che iniziano per "The"](images/librarian-manage-books-found.png)
 
-![img.png](images/librarian-manage-books-edit.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage books, edit</figcaption>
+![Manage books, edit](images/librarian-manage-books-edit.png)
 
-![img.png](images/librarian-manage-branches.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage branches</figcaption>
+![Manage branches](images/librarian-manage-branches.png)
 
-![img.png](images/librarian-manage-branches-search.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage branches, trovate le sedi di Rivendell</figcaption>
+![Manage branches, trovate le sedi di Rivendell](images/librarian-manage-branches-search.png)
 
-![img.png](images/librarian-manage-branches-stats.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage branches, statistiche per sede di Rivendell</figcaption>
+![Manage branches, statistiche per sede di Rivendell](images/librarian-manage-branches-stats.png)
 
-![img.png](images/librarian-manage-branches-edit.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage branches, edit</figcaption>
+![Manage branches, edit](images/librarian-manage-branches-edit.png)
 
-![img.png](images/librarian-manage-loans-edit.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage loans</figcaption>
+![Manage loans](images/librarian-manage-loans-edit.png)
 
-![img.png](images/librarian-manage-loans-extend-loan-error.png)
-<figcaption style="margin-top: -25px; font-style: italic">Manage loans, non si puo' estendere un loan overdue</figcaption>
+![Manage loans, non si puo' estendere un loan overdue](images/librarian-manage-loans-extend-loan-error.png)
 
-![img.png](images/librarian-change-password.png)
-<figcaption style="margin-top: -25px; font-style: italic">Change password, come per il lettore</figcaption>
+![Change password, come per il lettore](images/librarian-change-password.png)
