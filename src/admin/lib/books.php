@@ -1,7 +1,7 @@
 <?php
 require_once '../config.php';
 
-function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors) {
+function update_book_for_librarian($id_book, $isbn, $title, $publisher, $plot, $selected_authors) {
     $db = get_connection();
     $query = "UPDATE book SET isbn = $1, title = $2, publisher = $3, plot = $4 WHERE id = $5";
     $result = pg_prepare($db, 'update_book_query', $query);
@@ -29,7 +29,7 @@ function update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publish
     }
 }
 
-function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors) {
+function insert_book_for_librarian($isbn, $title, $publisher, $plot, $selected_authors) {
     $db = get_connection();
     $query = "INSERT INTO book (isbn, title, publisher, plot) VALUES ($1, $2, $3, $4) RETURNING id";
     $result = pg_prepare($db, 'insert_book_query', $query);
@@ -52,10 +52,6 @@ function insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot,
             return pg_last_error($db);
         }
     }
-
-    $query = "INSERT INTO physical_copy (id_book, id_branch) VALUES ($1, $2)";
-    $result = pg_prepare($db, 'insert_physical_copy_query', $query);
-    $result = pg_execute($db, 'insert_physical_copy_query', array($id_book, $id_branch));
 
     return pg_last_error($db);
 }

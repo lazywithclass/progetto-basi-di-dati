@@ -8,6 +8,7 @@
             $navItems = [
                 ['label' => 'Manage Readers', 'link' => '/admin/manage-readers.php'],
                 ['label' => 'Manage Books', 'link' => '/admin/manage-books.php'],
+                ['label' => 'Manage Books Copies', 'link' => '/admin/manage-books-copies.php'],
                 ['label' => 'Manage Branches', 'link' => '/admin/manage-branches.php'],
                 ['label' => 'Manage Loans', 'link' => '/admin/manage-loans.php']
             ];

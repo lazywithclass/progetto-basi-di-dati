@@ -24,14 +24,13 @@ if (!$result) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['create'])) {
-        $id_branch = $_POST['id_branch'];
         $isbn = $_POST['isbn'];
         $title = $_POST['title'];
         $publisher = $_POST['publisher'];
         $plot = $_POST['plot'];
         $selected_authors = $_POST['authors'];
 
-        $error = insert_book_for_librarian($id_branch, $isbn, $title, $publisher, $plot, $selected_authors);
+        $error = insert_book_for_librarian($isbn, $title, $publisher, $plot, $selected_authors);
         if (empty($error)) {
             $success = "Book added successfully";
         }
@@ -39,14 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['update'])) {
         $id_book = $_GET['edit'];
-        $id_branch = $_POST['id_branch'];
         $isbn = $_POST['isbn'];
         $title = $_POST['title'];
         $publisher = $_POST['publisher'];
         $plot = $_POST['plot'];
         $selected_authors = $_POST['authors'];
 
-        $error = update_book_for_librarian($id_branch, $id_book, $isbn, $title, $publisher, $plot, $selected_authors);
+        $error = update_book_for_librarian($id_book, $isbn, $title, $publisher, $plot, $selected_authors);
         if (empty($error)) {
             $success = "Book updated successfully";
         }
@@ -95,7 +93,6 @@ if (isset($_GET['edit'])) {
     }
 }
 
-$branches = find_librarian_branches($_SESSION['id']);
 $search = $_GET['search'] ?? '';
 $books = find_books_for_librarian($_SESSION['id'], $search);
 ?>
@@ -137,17 +134,6 @@ $books = find_books_for_librarian($_SESSION['id'], $search);
                         <option value="<?= htmlspecialchars($author['id']); ?>"
                             <?= (isset($selectedAuthors) && in_array($author['id'], $selectedAuthors)) ? 'selected' : ''; ?>>
                             <?= htmlspecialchars($author['name'] . ' ' . $author['surname']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Branch:</label>
-                <select name="id_branch" class="form-control" required>
-                    <?php foreach ($branches as $branch): ?>
-                        <option value="<?= htmlspecialchars($branch['id']); ?>"
-                            <?= (isset($selectedBranch) && in_array($branch['id'], $selectedBranch)) ? 'selected' : ''; ?>>
-                            <?= htmlspecialchars($branch['city'] . ' ' . $branch['address']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>

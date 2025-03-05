@@ -234,6 +234,8 @@ Eventuali file condivisi sono dentro src/ stessa.
 
 ![Manage books, edit](images/librarian-manage-books-edit.png)
 
+![Manage book copies](images/librarian-manage-books-copies.png)
+
 ![Manage branches](images/librarian-manage-branches.png)
 
 ![Manage branches, trovate le sedi di Rivendell](images/librarian-manage-branches-search.png)
